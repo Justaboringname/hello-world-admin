@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* Same palette as the main app: a soft grey canvas with cards on `surface`. */
+:root {
+  --background: #f6f6f8;
+  --foreground: #18181b;
+  --surface: #ffffff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #09090b;
+    --foreground: #ededed;
+    --surface: #131316;
+  }
+}
+
+/* A little larger on big screens. Less than the main app: tables and charts
+   want the room. */
+html {
+  font-size: 100%;
+}
+@media (min-width: 96rem) {
+  html {
+    font-size: 112.5%; /* >= 1536px */
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
