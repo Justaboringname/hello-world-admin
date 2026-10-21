@@ -20,7 +20,7 @@ export default async function DashboardPage() {
         <ErrorNote>
           {/* PGRST202: PostgREST can't find the function, so admin.sql hasn't been run. */}
           {error.code === "PGRST202"
-            ? "The admin_dashboard() function isn't in the database yet. Run admin/supabase/admin.sql in the Supabase SQL Editor, then reload this page."
+            ? "The admin_dashboard() function isn't in the database yet. Run supabase/admin.sql in the Supabase SQL Editor, then reload this page."
             : `Couldn't load the statistics: ${error.message}`}
         </ErrorNote>
       ) : dashboard ? (

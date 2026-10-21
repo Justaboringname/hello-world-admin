@@ -1,8 +1,9 @@
 # Hello World Admin
 
-Week 6: an admin panel for the [Hello World](../README.md) caption and meme
-app. It's a separate Next.js app on its own Vercel project, sharing the main
-app's Supabase database and Google sign-in. Only users whose
+Week 6: an admin panel for the
+[Hello World](https://github.com/Justaboringname/hello-world) caption and meme
+app. It's a separate Next.js app in its own repository and Vercel project,
+sharing the main app's Supabase database and Google sign-in. Only users whose
 `profiles.is_superadmin` is `true` can get past the login page.
 
 | Route          | What it does                                                                 |
@@ -81,8 +82,9 @@ statement again to add admins, or set the flag to `false` to remove one.
 
 ### 1. Database
 
-In the Supabase SQL Editor, after the main app's files, run
-[`supabase/admin.sql`](supabase/admin.sql). Put your Google email in step 8
+In the Supabase SQL Editor, after
+[the main app's files](https://github.com/Justaboringname/hello-world/tree/main/supabase),
+run [`supabase/admin.sql`](supabase/admin.sql). Put your Google email in step 8
 first, or edit and run just that statement afterwards. Sign in with Google
 once before running it (to either app), so you have a profile. The file is
 safe to re-run. Its last result lists the superadmins: expect your email.
@@ -99,8 +101,8 @@ the app.
 
 ### 3. Vercel
 
-Add New → Project → import this same repository again, and set **Root
-Directory** to `admin`. Then:
+Add New → Project → import this repository, in the same team as the main
+app. Then:
 
 - Settings → Environment Variables:
 
@@ -116,16 +118,12 @@ Directory** to `admin`. Then:
   login page opens in an incognito window. The panel still needs a superadmin
   Google account.
 
-The app has no imports from outside `admin/`, so it also works copied into a
-repository of its own.
-
 ## Development
 
 ```bash
-cd admin
 npm install
 npm run dev -- -p 3001
 ```
 
-Put the same variables in `admin/.env.local`. The main app can run on port
+Put the same variables in `.env.local`. The main app can run on port
 3000 at the same time.

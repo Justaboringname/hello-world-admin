@@ -93,7 +93,7 @@ export function LoadError({ what, error }: { what: string; error: { code?: strin
   return (
     <ErrorNote>
       Couldn&apos;t load {what}: {error.message || "the database didn't answer."}
-      {error.code && SETUP_CODES.includes(error.code) && " Has admin/supabase/admin.sql been run in the SQL Editor?"}
+      {error.code && SETUP_CODES.includes(error.code) && " Has supabase/admin.sql been run in the SQL Editor?"}
     </ErrorNote>
   );
 }
