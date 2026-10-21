@@ -134,10 +134,17 @@ export async function generateCaptions({
   }
 
   throw new CaptionError(
-    isBusy(lastError)
-      ? "Gemini is overloaded right now. Wait a minute and try again."
-      : "Gemini couldn't caption that photo. Please try again.",
+    isBadKey(lastError)
+      ? "Gemini rejected the API key. Check GEMINI_API_KEY in the Vercel project, then redeploy."
+      : isBusy(lastError)
+        ? "Gemini is overloaded right now. Wait a minute and try again."
+        : "Gemini couldn't caption that photo. Please try again.",
   );
+}
+
+// A wrong or revoked key: trying again can't help, so say what to fix.
+function isBadKey(error: unknown) {
+  return error instanceof ApiError && error.message.includes("API_KEY_INVALID");
 }
 
 // A request that was cut off by our timeout or deadline.

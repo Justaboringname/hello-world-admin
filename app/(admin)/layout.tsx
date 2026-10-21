@@ -63,7 +63,8 @@ export default async function AdminLayout({ children }: LayoutProps<"/">) {
       </aside>
 
       <main id="content" className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
-        {children}
+        {/* Centered so wide screens don't leave everything hugging the sidebar. */}
+        <div className="mx-auto w-full max-w-7xl">{children}</div>
       </main>
     </div>
   );

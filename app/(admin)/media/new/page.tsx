@@ -13,7 +13,7 @@ export default async function NewMediaPage() {
   const admin = await requireAdmin("/media/new");
 
   return (
-    <div className="max-w-2xl">
+    <div>
       <BackLink href="/media">All AI media</BackLink>
       <div className="mt-3">
         <PageHeader

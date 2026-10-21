@@ -28,6 +28,9 @@ import { StatTile } from "./stat-tile";
 import { VibeBoard, rankVibes } from "./vibes";
 import { VoteHeatmap, summarizeHeatmap } from "./vote-heatmap";
 
+// The short lists on the first screen show this many rows.
+const TOP_N = 3;
+
 // Every headline below is worked out from the numbers, so it says what the
 // data shows today rather than what we hoped it would.
 
@@ -90,7 +93,10 @@ function tiedLeaders<T>(
 ) {
   const top = rows.filter((row) => value(row) === value(rows[0]!));
   if (top.length < 2) return null;
-  return top.length <= 3 ? andList.format(top.map(name)) : `${top.length} ${noun}`;
+  const names = top.map(name);
+  // Two accounts can share a name; "Yihan Zhu and Yihan Zhu" reads like a bug.
+  const distinct = new Set(names).size === names.length;
+  return top.length <= 3 && distinct ? andList.format(names) : `${top.length} ${noun}`;
 }
 
 function creatorHeadline(creators: Dashboard["top_creators"]) {
@@ -208,19 +214,13 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
         />
       </div>
 
-      {/* Dense flow lets a narrow card fill the gap beside a wide one, so
-          two-column screens don't end up with holes. */}
-      <div className="grid grid-flow-row-dense gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-2">
         <Panel
           id="activity"
           topic="Last 30 days"
           title={activityHeadline(now.votes, before.votes, monthVotes)}
-          description={
-            busiest
-              ? `Busiest day: ${dayLabel(busiest.day, "long")}, with ${plural(busiest.votes, "vote")}. Days are New York time.`
-              : "Days are New York time."
-          }
-          className="md:col-span-2"
+          description={busiest ? `Busiest day: ${dayLabel(busiest.day, "long")}, with ${plural(busiest.votes, "vote")}.` : undefined}
+          className="lg:col-span-2"
         >
           <ActivityChart days={d.daily} />
           <TableView
@@ -233,121 +233,32 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
         </Panel>
 
         <Panel
-          id="funnel"
-          topic="From sign-up to regular"
-          title={funnelHeadline(funnel)}
-          description="People at each step, as a share of everyone who signed up."
-          footer="Steps count people and aren't nested: someone can post without ever voting."
-        >
-          <Funnel funnel={funnel} />
-        </Panel>
-
-        <Panel
-          id="heatmap"
-          topic="When does campus laugh?"
-          title={heatmapHeadline(heat)}
-          description="Votes by weekday and hour, New York time. The busier the hour, the more its square stands out."
-          className="md:col-span-2"
-        >
-          <VoteHeatmap summary={heat} />
-        </Panel>
-
-        <Panel id="kinds" topic="AI vs. humans: who's funnier?" title={kindsHeadline(kinds)}>
-          <AiVsHumans
-            comparison={kinds}
-            captions={totals.captions}
-            classics={Math.max(0, totals.memes - totals.user_memes)}
-          />
-        </Panel>
-
-        <Panel
-          id="vibes"
-          topic="Vibes leaderboard"
-          title={
-            !bestVibe
-              ? "No votes on any vibe yet"
-              : bestVibe.votes < FEW_VOTES
-                ? `${vibeLabel(bestVibe.vibe)} leads, on just ${plural(bestVibe.votes, "vote")}`
-                : `${vibeLabel(bestVibe.vibe)} gets the most laughs`
-          }
-          description={`Each voice's captions, ranked by the share of votes that are 👍. Vibes with under ${FEW_VOTES} votes rank after the rest.`}
-        >
-          <VibeBoard rows={vibes} />
-        </Panel>
-
-        <Panel
-          id="positions"
-          topic="Does Gemini save its best joke for first?"
-          title={positionHeadline(positions)}
-          description={
-            positions.decided
-              ? `Which caption leads each of the ${formatNumber(positions.decided)} photos with a clear winner.`
-              : undefined
-          }
-        >
-          {positions.decided && positions.rows.length ? (
-            <PositionBias stats={positions} />
-          ) : (
-            <NoData>A photo counts once one of its captions is ahead outright. None is yet.</NoData>
-          )}
-        </Panel>
-
-        <Panel
-          id="models"
-          topic="Gemini models"
-          title={modelHeadline(models)}
-          description="Photos per model, and how their captions scored."
-        >
-          {models.rows.length ? <ModelBoard stats={models} /> : <NoData>No photos yet.</NoData>}
-        </Panel>
-
-        <Panel
           id="top-captions"
-          topic="Hall of fame: captions"
+          topic="Best captions"
           title={topCaption ? `Gemini's best line scored ${signedScore(topCaption.score)}` : "No caption votes yet"}
-          description="The highest scores (👍 minus 👎). Open one to see its photo."
         >
           {d.top_captions.length ? (
-            <CaptionList captions={d.top_captions} variant="top" />
+            <CaptionList captions={d.top_captions.slice(0, TOP_N)} variant="top" />
           ) : (
             <NoData>Once people vote on captions, the best ones show up here.</NoData>
           )}
         </Panel>
 
         <Panel
-          id="divisive"
-          topic="Most divisive"
-          title={
-            splitCaption
-              ? `The most divisive caption split ${formatNumber(splitCaption.upvotes)} 👍 to ${formatNumber(splitCaption.downvotes)} 👎`
-              : "Nobody disagrees yet"
-          }
-          description="Captions with the most votes on both sides."
+          id="top-memes"
+          topic="Best memes"
+          title={topMeme ? `“${truncate(topMeme.title, 40)}” is the crowd favorite` : "No meme votes yet"}
         >
-          {d.divisive_captions.length ? (
-            <CaptionList captions={d.divisive_captions} variant="divisive" />
+          {d.top_memes.length ? (
+            <MemeList memes={d.top_memes.slice(0, TOP_N)} />
           ) : (
-            <NoData>No caption has both a 👍 and a 👎 yet.</NoData>
+            <NoData>No meme has a vote yet.</NoData>
           )}
         </Panel>
 
-        <Panel
-          id="top-memes"
-          topic="Hall of fame: memes"
-          title={topMeme ? `“${truncate(topMeme.title, 40)}” is the crowd favorite` : "No meme votes yet"}
-          description="The highest-scoring memes, people's and the classics alike."
-        >
-          {d.top_memes.length ? <MemeList memes={d.top_memes} /> : <NoData>No meme has a vote yet.</NoData>}
-        </Panel>
-
-        <Panel
-          id="creators"
-          topic="Top creators"
-          title={creatorHeadline(d.top_creators)}
-          description="👍 on their photos' captions and on their memes."
-        >
+        <Panel id="creators" topic="Top creators" title={creatorHeadline(d.top_creators.slice(0, TOP_N))}>
           {d.top_creators.length ? (
-            <CreatorList creators={d.top_creators} />
+            <CreatorList creators={d.top_creators.slice(0, TOP_N)} />
           ) : (
             <NoData>No posts yet.</NoData>
           )}
@@ -361,51 +272,156 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
               ? `${displayName(topVoter.name)} has voted the most (${plural(topVoter.votes, "time")})`
               : "Nobody has voted yet"
           }
-          description="Votes cast, how many were 👍, and on how many days."
         >
-          {d.top_voters.length ? <VoterList voters={d.top_voters} /> : <NoData>No votes yet.</NoData>}
-        </Panel>
-
-        <Panel
-          id="awards"
-          topic="Superlatives"
-          title={awardsHeadline(awards)}
-          description="Critic and fan need 5+ votes. Late night is midnight to 5 AM, New York time."
-        >
-          <AwardList awards={awards} />
-        </Panel>
-
-        <Panel
-          id="locations"
-          topic="Where people post from"
-          title={locationHeadline(d.locations)}
-          description="The 8 most common, as people typed them, with their share of all photos."
-        >
-          {d.locations.length ? (
-            <LocationBoard locations={d.locations} photos={totals.photos} />
+          {d.top_voters.length ? (
+            <VoterList voters={d.top_voters.slice(0, TOP_N)} />
           ) : (
-            <NoData>Nobody has added a location to a photo yet.</NoData>
+            <NoData>No votes yet.</NoData>
           )}
-        </Panel>
-
-        <Panel
-          id="health"
-          topic="Health check"
-          title={
-            d.first_vote_minutes !== null
-              ? `New posts get their first vote in ${formatWait(d.first_vote_minutes)} (median)`
-              : "No post has a vote yet"
-          }
-          description="Whether new posts get seen, and who's taking part."
-          className="md:col-span-2"
-        >
-          <HealthFacts totals={totals} firstVoteMinutes={d.first_vote_minutes} />
         </Panel>
       </div>
 
+      {/* The deeper stats stay one click away, so the first screen is just
+          the numbers people check every day. */}
+      {/* A named group: the charts inside use plain group-hover/group-open
+          for their own tooltips and tables. */}
+      <details className="group/more">
+        <summary className="mx-auto flex w-fit cursor-pointer select-none list-none items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm ring-1 ring-inset ring-zinc-200 transition hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:ring-zinc-800 dark:hover:bg-zinc-800 [&::-webkit-details-marker]:hidden">
+          <span className="group-open/more:hidden">More stats</span>
+          <span className="hidden group-open/more:inline">Fewer stats</span>
+          <span aria-hidden className="transition group-open/more:rotate-180">
+            ▾
+          </span>
+        </summary>
+        {/* Dense flow lets a narrow card fill the gap beside a wide one, so
+            two-column screens don't end up with holes. */}
+        <div className="mt-4 grid grid-flow-row-dense gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <Panel
+            id="funnel"
+            topic="From sign-up to regular"
+            title={funnelHeadline(funnel)}
+            description="People at each step, as a share of everyone who signed up."
+            footer="Steps count people and aren't nested: someone can post without ever voting."
+          >
+            <Funnel funnel={funnel} />
+          </Panel>
+
+          <Panel
+            id="heatmap"
+            topic="When does campus laugh?"
+            title={heatmapHeadline(heat)}
+            description="Votes by weekday and hour, New York time. The busier the hour, the more its square stands out."
+            className="md:col-span-2"
+          >
+            <VoteHeatmap summary={heat} />
+          </Panel>
+
+          <Panel id="kinds" topic="AI vs. humans: who's funnier?" title={kindsHeadline(kinds)}>
+            <AiVsHumans
+              comparison={kinds}
+              captions={totals.captions}
+              classics={Math.max(0, totals.memes - totals.user_memes)}
+            />
+          </Panel>
+
+          <Panel
+            id="vibes"
+            topic="Vibes leaderboard"
+            title={
+              !bestVibe
+                ? "No votes on any vibe yet"
+                : bestVibe.votes < FEW_VOTES
+                  ? `${vibeLabel(bestVibe.vibe)} leads, on just ${plural(bestVibe.votes, "vote")}`
+                  : `${vibeLabel(bestVibe.vibe)} gets the most laughs`
+            }
+            description={`Each voice's captions, ranked by the share of votes that are 👍. Vibes with under ${FEW_VOTES} votes rank after the rest.`}
+          >
+            <VibeBoard rows={vibes} />
+          </Panel>
+
+          <Panel
+            id="positions"
+            topic="Does Gemini save its best joke for first?"
+            title={positionHeadline(positions)}
+            description={
+              positions.decided
+                ? `Which caption leads each of the ${formatNumber(positions.decided)} photos with a clear winner.`
+                : undefined
+            }
+          >
+            {positions.decided && positions.rows.length ? (
+              <PositionBias stats={positions} />
+            ) : (
+              <NoData>A photo counts once one of its captions is ahead outright. None is yet.</NoData>
+            )}
+          </Panel>
+
+          <Panel
+            id="models"
+            topic="Gemini models"
+            title={modelHeadline(models)}
+            description="Photos per model, and how their captions scored."
+          >
+            {models.rows.length ? <ModelBoard stats={models} /> : <NoData>No photos yet.</NoData>}
+          </Panel>
+
+          <Panel
+            id="divisive"
+            topic="Most divisive"
+            title={
+              splitCaption
+                ? `The most divisive caption split ${formatNumber(splitCaption.upvotes)} 👍 to ${formatNumber(splitCaption.downvotes)} 👎`
+                : "Nobody disagrees yet"
+            }
+            description="Captions with the most votes on both sides."
+          >
+            {d.divisive_captions.length ? (
+              <CaptionList captions={d.divisive_captions} variant="divisive" />
+            ) : (
+              <NoData>No caption has both a 👍 and a 👎 yet.</NoData>
+            )}
+          </Panel>
+
+          <Panel
+            id="awards"
+            topic="Superlatives"
+            title={awardsHeadline(awards)}
+            description="Critic and fan need 5+ votes. Late night is midnight to 5 AM, New York time."
+          >
+            <AwardList awards={awards} />
+          </Panel>
+
+          <Panel
+            id="locations"
+            topic="Where people post from"
+            title={locationHeadline(d.locations)}
+            description="The 8 most common, as people typed them, with their share of all photos."
+          >
+            {d.locations.length ? (
+              <LocationBoard locations={d.locations} photos={totals.photos} />
+            ) : (
+              <NoData>Nobody has added a location to a photo yet.</NoData>
+            )}
+          </Panel>
+
+          <Panel
+            id="health"
+            topic="Health check"
+            title={
+              d.first_vote_minutes !== null
+                ? `New posts get their first vote in ${formatWait(d.first_vote_minutes)} (median)`
+                : "No post has a vote yet"
+            }
+            description="Whether new posts get seen, and who's taking part."
+            className="md:col-span-2"
+          >
+            <HealthFacts totals={totals} firstVoteMinutes={d.first_vote_minutes} />
+          </Panel>
+        </div>
+      </details>
+
       <footer className="pt-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
-        Stats generated {formatDateTime(d.generated_at)}, New York time. Days and hours on this page
-        are New York time too.
+        Updated {formatDateTime(d.generated_at)}. All days and hours are New York time.
       </footer>
     </div>
   );

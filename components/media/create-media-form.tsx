@@ -104,7 +104,9 @@ export function CreateMediaForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+    // Photo on the left and the choices on the right from lg up, so the
+    // whole form (and any error) fits on one screen.
+    <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-8">
       <input
         ref={inputRef}
         type="file"
@@ -112,7 +114,7 @@ export function CreateMediaForm() {
         onChange={handlePhoto}
         className="hidden"
       />
-      <div>
+      <div className="lg:sticky lg:top-8">
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
@@ -147,6 +149,7 @@ export function CreateMediaForm() {
         )}
       </div>
 
+      <div className="flex min-w-0 flex-col gap-6">
       {/* Locked while saving, so the button's label matches what was sent. */}
       <fieldset disabled={pending}>
         <legend className="text-sm font-medium">Vibe</legend>
@@ -257,6 +260,7 @@ export function CreateMediaForm() {
       </div>
 
       <ActionMessage state={state} />
+      </div>
     </form>
   );
 }
