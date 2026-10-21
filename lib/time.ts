@@ -13,7 +13,9 @@ const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
 export function timeAgo(iso: string, now = Date.now()) {
   const seconds = Math.round((new Date(iso).getTime() - now) / 1000);
   for (const [unit, size] of UNITS) {
-    if (Math.abs(seconds) >= size) return relative.format(Math.trunc(seconds / size), unit);
+    // Rounded, not truncated: 47 hours ago is "2 days ago", not "yesterday",
+    // so it agrees with the date shown next to it.
+    if (Math.abs(seconds) >= size) return relative.format(Math.round(seconds / size), unit);
   }
   return "just now";
 }

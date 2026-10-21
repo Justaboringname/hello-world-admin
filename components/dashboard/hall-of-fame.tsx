@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { formatNumber } from "@/lib/format";
 import { vibeLabel } from "@/lib/captions";
 import type { Dashboard, RankedCaption } from "@/lib/dashboard";
+import { formatNumber } from "@/lib/format";
 import { memeImageUrl, photoUrl } from "@/lib/storage";
 import { ordinal, signed } from "./numbers";
 import { UpDownBar } from "./up-down-bar";

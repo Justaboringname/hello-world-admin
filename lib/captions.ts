@@ -45,6 +45,10 @@ export const VIBES = {
 
 export type Vibe = keyof typeof VIBES;
 
+// generations.model for captions an admin wrote by hand on /media/new
+// instead of asking Gemini.
+export const MANUAL_MODEL = "manual";
+
 export function isVibe(value: unknown): value is Vibe {
   return typeof value === "string" && Object.hasOwn(VIBES, value);
 }

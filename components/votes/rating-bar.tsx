@@ -42,7 +42,7 @@ export function RatingBar({
       </div>
       {/* The bar's label already says all of this to screen readers. */}
       {showCounts && (
-        <p aria-hidden className="mt-1 flex items-center justify-between gap-2 text-xs tabular-nums text-zinc-500">
+        <p aria-hidden className="mt-1 flex items-center justify-between gap-2 text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
           <span>👍 {formatNumber(up)}</span>
           <span className="font-medium text-zinc-700 dark:text-zinc-300">
             {total ? `${share} up` : "No votes"}

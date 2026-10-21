@@ -30,8 +30,8 @@ export async function signInWithGoogle(formData: FormData) {
   });
 
   if (error || !data.url) {
-    const message = error?.message ?? "Could not start Google sign-in.";
-    redirect(`/login?error=${encodeURIComponent(message)}`);
+    console.error("Could not start Google sign-in", error ?? "no URL");
+    redirect("/login?error=1");
   }
 
   (await cookies()).set(NEXT_PATH_COOKIE, next, {

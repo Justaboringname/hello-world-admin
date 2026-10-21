@@ -7,7 +7,9 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Everything except static assets and image optimization.
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // Everything except Next.js's own files, the app icons and robots.txt.
+    // Unlike the main app, paths ending in .png or .svg aren't skipped: the
+    // panel has no public images, and /media/1.png must hit the wall too.
+    "/((?!_next/static|_next/image|(?:favicon\\.ico|icon\\.svg|apple-icon\\.png|robots\\.txt)$).*)",
   ],
 };

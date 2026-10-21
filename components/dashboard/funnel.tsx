@@ -1,5 +1,5 @@
-import { formatNumber } from "@/lib/format";
 import type { Dashboard } from "@/lib/dashboard";
+import { formatNumber } from "@/lib/format";
 import { STAGES } from "./colors";
 import { HBar } from "./bar";
 import { fraction, percent, share } from "./numbers";

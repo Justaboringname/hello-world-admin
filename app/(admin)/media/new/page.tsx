@@ -15,7 +15,7 @@ export default async function NewMediaPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <Link href="/media" className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white">
+      <Link href="/media" className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
         ← All AI media
       </Link>
       <div className="mt-3">

@@ -16,7 +16,7 @@ export function UserChip({
 }) {
   return (
     <p className="flex flex-wrap items-center gap-2 text-sm">
-      <span className="text-zinc-500">{prefix}</span>
+      <span className="text-zinc-500 dark:text-zinc-400">{prefix}</span>
       <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 py-1 pl-3 pr-1 font-medium text-blue-800 dark:bg-blue-950 dark:text-blue-200">
         <Link href={`/users/${userId}`} className="hover:underline">
           {name}

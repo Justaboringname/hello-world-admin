@@ -15,7 +15,7 @@ export function PageHeader({
     <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div className="min-w-0">
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h1>
-        {description && <p className="mt-1 max-w-2xl text-sm text-zinc-500">{description}</p>}
+        {description && <p className="mt-1 max-w-2xl text-sm text-zinc-500 dark:text-zinc-400">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </header>
@@ -43,7 +43,7 @@ export function Card({
         <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
           <div className="min-w-0">
             {title && <h2 className="font-semibold">{title}</h2>}
-            {description && <p className="mt-0.5 text-sm text-zinc-500">{description}</p>}
+            {description && <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">{description}</p>}
           </div>
           {actions}
         </div>
@@ -55,7 +55,7 @@ export function Card({
 
 export function EmptyState({ children }: { children: React.ReactNode }) {
   return (
-    <p className="rounded-xl border border-dashed border-zinc-300 px-4 py-10 text-center text-sm text-zinc-500 dark:border-zinc-700">
+    <p className="rounded-xl border border-dashed border-zinc-300 px-4 py-10 text-center text-sm text-zinc-500 dark:text-zinc-400 dark:border-zinc-700">
       {children}
     </p>
   );
@@ -174,7 +174,7 @@ export function Pagination({
       ) : (
         <span className={disabledClass}>← Previous</span>
       )}
-      <span className="text-sm tabular-nums text-zinc-500">
+      <span className="text-sm tabular-nums text-zinc-500 dark:text-zinc-400">
         Page {Math.min(page + 1, pages)} of {pages}
       </span>
       {page + 1 < pages ? (
@@ -206,7 +206,7 @@ export function FilterTabs({
           className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
             item.active
               ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-              : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+              : "bg-white text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:ring-zinc-800 dark:hover:bg-zinc-800"
           }`}
         >
           {item.label}

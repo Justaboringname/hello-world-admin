@@ -41,7 +41,7 @@ export function VotesTable({ votes }: { votes: VoteRow[] }) {
     <div className="overflow-x-auto rounded-2xl border border-zinc-200 bg-surface shadow-sm dark:border-zinc-800">
       <table className="w-full min-w-[44rem] text-left text-sm">
         <caption className="sr-only">Votes, newest first</caption>
-        <thead className="border-b border-zinc-200 text-xs uppercase tracking-wider text-zinc-500 dark:border-zinc-800">
+        <thead className="border-b border-zinc-200 text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400 dark:border-zinc-800">
           <tr>
             <th scope="col" className={headClass}>
               Voter
@@ -69,7 +69,7 @@ export function VotesTable({ votes }: { votes: VoteRow[] }) {
                   <Link href={`/users/${vote.user_id}`} className="group flex items-center gap-2.5">
                     <Avatar src={vote.voter_avatar_url} name={name} />
                     <span
-                      className={`max-w-[12rem] truncate group-hover:underline ${vote.voter_name ? "font-medium" : "italic text-zinc-500"}`}
+                      className={`max-w-[12rem] truncate group-hover:underline ${vote.voter_name ? "font-medium" : "italic text-zinc-500 dark:text-zinc-400"}`}
                     >
                       {name}
                     </span>
@@ -90,7 +90,7 @@ export function VotesTable({ votes }: { votes: VoteRow[] }) {
                     {vote.kind === "caption" ? `“${vote.label}”` : vote.label}
                   </Link>
                 </td>
-                <td className="whitespace-nowrap px-4 py-2.5 text-zinc-500">
+                <td className="whitespace-nowrap px-4 py-2.5 text-zinc-500 dark:text-zinc-400">
                   <VoteTime vote={vote} />
                 </td>
               </tr>

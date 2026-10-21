@@ -33,7 +33,7 @@ export function MemeCard({ meme }: { meme: MemeRow }) {
           {meme.members_only && <Badge tone="blue">🔓 Members only</Badge>}
         </span>
 
-        <span className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs tabular-nums text-zinc-500">
+        <span className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
           {/* aria-label is ignored on a plain span, so the words are sr-only text. */}
           <span>
             <span aria-hidden>👍</span> {formatNumber(meme.upvotes)}

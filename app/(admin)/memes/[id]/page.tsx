@@ -24,7 +24,7 @@ const linkClass = "font-medium text-blue-600 hover:underline dark:text-blue-400"
 
 function BackLink() {
   return (
-    <Link href="/memes" className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white">
+    <Link href="/memes" className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
       ← All memes
     </Link>
   );
@@ -33,7 +33,7 @@ function BackLink() {
 function Detail({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5 py-2.5 sm:flex-row sm:gap-4">
-      <dt className="shrink-0 text-sm text-zinc-500 sm:w-24">{label}</dt>
+      <dt className="shrink-0 text-sm text-zinc-500 dark:text-zinc-400 sm:w-24">{label}</dt>
       <dd className="min-w-0 flex-1 break-words text-sm">{children}</dd>
     </div>
   );
@@ -42,7 +42,7 @@ function Detail({ label, children }: { label: string; children: React.ReactNode 
 function When({ iso }: { iso: string }) {
   return (
     <>
-      {formatDateTime(iso)} <span className="text-zinc-500">({timeAgo(iso)})</span>
+      {formatDateTime(iso)} <span className="text-zinc-500 dark:text-zinc-400">({timeAgo(iso)})</span>
     </>
   );
 }
@@ -163,7 +163,7 @@ export default async function MemeDetailPage({ params }: PageProps<"/memes/[id]"
                   <When iso={votes[0].created_at} />
                 ) : (
                   // A failed votes query isn't "no votes"; Recent votes says what went wrong.
-                  <span className="text-zinc-500">{votesResult.error ? "–" : "No votes yet"}</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">{votesResult.error ? "–" : "No votes yet"}</span>
                 )}
               </Detail>
               <Detail label="Who sees it">
@@ -173,7 +173,7 @@ export default async function MemeDetailPage({ params }: PageProps<"/memes/[id]"
                 {meme.image_path ? (
                   <>
                     Uploaded to Storage
-                    <span className="mt-0.5 block truncate font-mono text-xs text-zinc-500" title={meme.image_path}>
+                    <span className="mt-0.5 block truncate font-mono text-xs text-zinc-500 dark:text-zinc-400" title={meme.image_path}>
                       {meme.image_path}
                     </span>
                   </>
@@ -182,7 +182,7 @@ export default async function MemeDetailPage({ params }: PageProps<"/memes/[id]"
                     Hosted on imgflip ↗
                   </a>
                 ) : (
-                  <span className="text-zinc-500">None</span>
+                  <span className="text-zinc-500 dark:text-zinc-400">None</span>
                 )}
               </Detail>
               <Detail label="Votes">

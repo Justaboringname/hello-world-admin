@@ -8,7 +8,7 @@ export default function NotFound() {
         🔎
       </p>
       <h1 className="mt-3 text-xl font-semibold">Not found</h1>
-      <p className="mt-1 text-sm text-zinc-500">
+      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
         It may have been deleted, or the link is wrong.
       </p>
       <Link

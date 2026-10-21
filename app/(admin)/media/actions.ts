@@ -2,12 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { MANUAL_MODEL, tidyText } from "@/components/media/data";
+import { tidyText } from "@/components/media/data";
 import type { ActionState } from "@/lib/action-state";
 import { requireAdmin } from "@/lib/auth";
 import {
   CAPTION_MAX_LENGTH,
   LOCATION_MAX_LENGTH,
+  MANUAL_MODEL,
   MAX_CAPTIONS,
   PHOTO_BUCKET,
   PHOTO_MAX_BYTES,

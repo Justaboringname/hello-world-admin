@@ -58,12 +58,12 @@ export function UserPhotos({
                 </span>
                 <span className="block px-3 py-2">
                   <span className="line-clamp-2 text-sm font-medium">
-                    {photo.top_caption ?? <span className="italic text-zinc-500">No captions</span>}
+                    {photo.top_caption ?? <span className="italic text-zinc-500 dark:text-zinc-400">No captions</span>}
                   </span>
-                  <span className="mt-0.5 block truncate text-xs text-zinc-500">
+                  <span className="mt-0.5 block truncate text-xs text-zinc-500 dark:text-zinc-400">
                     {vibeLabel(photo.vibe)}
                   </span>
-                  <span className="block truncate text-xs tabular-nums text-zinc-500">
+                  <span className="block truncate text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
                     👍 {formatNumber(photo.upvotes)} · 👎 {formatNumber(photo.downvotes)} ·{" "}
                     {timeAgo(photo.created_at)}
                   </span>

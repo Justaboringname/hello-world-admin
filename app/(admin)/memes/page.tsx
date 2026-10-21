@@ -25,10 +25,11 @@ import {
 } from "@/components/ui";
 import { UserChip } from "@/components/votes/user-chip";
 import { requireAdmin } from "@/lib/auth";
-import { cleanSearch, formatNumber, fullName, pageIndex, parseUuid } from "@/lib/format";
+import { cleanSearch, formatNumber, pageIndex, parseUuid } from "@/lib/format";
 import { firstParam } from "@/lib/redirect";
 import { searchOr } from "@/lib/search";
 import { createClient } from "@/lib/supabase/server";
+import { userLabel } from "@/lib/users";
 
 export const metadata: Metadata = { title: "Memes" };
 
@@ -71,12 +72,10 @@ export default async function MemesPage({ searchParams }: PageProps<"/memes">) {
     .order("id", { ascending: false })
     .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
 
-  const [result, userResult] = await Promise.all([
+  const [result, chipLabel] = await Promise.all([
     query,
     // Just for the filter chip's label.
-    userId
-      ? supabase.from("profiles").select("first_name, last_name").eq("id", userId).maybeSingle()
-      : null,
+    userId ? userLabel(supabase, userId) : null,
   ]);
 
   const memes = (result.data ?? []) as MemeRow[];
@@ -84,7 +83,7 @@ export default async function MemesPage({ searchParams }: PageProps<"/memes">) {
   // PGRST103: a ?page= past the last page.
   const pastEnd = result.error?.code === "PGRST103" || (!result.error && !memes.length && page > 0);
   const error = pastEnd ? null : result.error;
-  const userName = fullName(userResult?.data) || memes[0]?.author_name || "this user";
+  const userName = chipLabel || memes[0]?.author_name || "this user";
 
   const linkParams = {
     q: q || undefined,
@@ -150,7 +149,7 @@ export default async function MemesPage({ searchParams }: PageProps<"/memes">) {
         </EmptyState>
       ) : (
         <>
-          <p className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm tabular-nums text-zinc-500">
+          <p className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm tabular-nums text-zinc-500 dark:text-zinc-400">
             <span>
               <span className="font-medium text-zinc-900 dark:text-zinc-100">{formatNumber(matched)}</span>{" "}
               {matched === 1 ? "meme" : "memes"}

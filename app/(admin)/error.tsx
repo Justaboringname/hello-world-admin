@@ -21,7 +21,7 @@ export default function AdminError({
         🫠
       </p>
       <h1 className="mt-3 text-xl font-semibold">Something went wrong</h1>
-      <p className="mt-1 text-sm text-zinc-500">
+      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
         The page couldn&apos;t load. It may be a hiccup on Supabase&apos;s side.
         {error.digest && <span className="block font-mono text-xs">Error {error.digest}</span>}
       </p>

@@ -1,5 +1,5 @@
-import type { VoteValue } from "@/lib/captions";
 import type { MemeRow } from "@/components/memes/data";
+import type { VoteValue } from "@/lib/captions";
 
 // Row shapes and URL options for /votes. The Supabase client is untyped, so
 // these mirror the admin_votes view in supabase/admin.sql and the captions

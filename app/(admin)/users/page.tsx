@@ -113,7 +113,7 @@ export default async function UsersPage({ searchParams }: PageProps<"/users">) {
         </EmptyState>
       ) : (
         <>
-          <p className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm tabular-nums text-zinc-500">
+          <p className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm tabular-nums text-zinc-500 dark:text-zinc-400">
             {q ? (
               <>
                 <span>

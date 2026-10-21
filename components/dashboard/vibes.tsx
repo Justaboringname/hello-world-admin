@@ -1,6 +1,6 @@
-import { formatNumber } from "@/lib/format";
 import { VIBES, isVibe, vibeLabel } from "@/lib/captions";
 import type { Dashboard } from "@/lib/dashboard";
+import { formatNumber } from "@/lib/format";
 import { DOWN, UP } from "./colors";
 import { FEW_VOTES, averageScore, percent, share } from "./numbers";
 import { Legend, Rank } from "./panel";

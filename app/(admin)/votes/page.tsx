@@ -35,10 +35,11 @@ import { SummaryTiles, type VoteSummary } from "@/components/votes/summary-tiles
 import { UserChip } from "@/components/votes/user-chip";
 import { VotesTable } from "@/components/votes/votes-table";
 import { requireAdmin } from "@/lib/auth";
-import { cleanSearch, formatNumber, fullName, pageIndex, parseUuid } from "@/lib/format";
+import { cleanSearch, formatNumber, pageIndex, parseUuid } from "@/lib/format";
 import { firstParam } from "@/lib/redirect";
 import { containsPattern } from "@/lib/search";
 import { createClient } from "@/lib/supabase/server";
+import { userLabel } from "@/lib/users";
 
 export const metadata: Metadata = { title: "Votes" };
 
@@ -118,7 +119,7 @@ function ResultCount({
   clearHref?: string;
 }) {
   return (
-    <p className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm tabular-nums text-zinc-500">
+    <p className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm tabular-nums text-zinc-500 dark:text-zinc-400">
       <span>
         <span className="font-medium text-zinc-900 dark:text-zinc-100">{formatNumber(total)}</span>{" "}
         {total === 1 ? noun[0] : noun[1]}
@@ -220,12 +221,10 @@ async function AllVotes({ supabase, kind, vote, userId, q, page }: TabProps) {
     .order("user_id", { ascending: true })
     .range(page * VOTES_PAGE_SIZE, page * VOTES_PAGE_SIZE + VOTES_PAGE_SIZE - 1);
 
-  const [result, profileResult] = await Promise.all([
+  const [result, chipLabel] = await Promise.all([
     query,
     // Just for the filter chip's label.
-    userId
-      ? supabase.from("profiles").select("first_name, last_name").eq("id", userId).maybeSingle()
-      : null,
+    userId ? userLabel(supabase, userId) : null,
   ]);
 
   const votes = (result.data ?? []) as VoteRow[];
@@ -233,7 +232,7 @@ async function AllVotes({ supabase, kind, vote, userId, q, page }: TabProps) {
   // PGRST103: a ?page= past the last page.
   const pastEnd = result.error?.code === "PGRST103" || (!result.error && !votes.length && page > 0);
   const error = pastEnd ? null : (result.error as QueryError);
-  const userName = fullName(profileResult?.data) || votes[0]?.voter_name || "this user";
+  const userName = chipLabel || votes[0]?.voter_name || "this user";
 
   const linkParams = {
     kind: kind === DEFAULT_VOTE_KIND ? undefined : kind,
@@ -381,7 +380,7 @@ async function Ratings({ supabase, kind, sort, q, page }: TabProps) {
           <FilterTabs label="Rank by" items={sortTabs} />
         </div>
         {sort === "divisive" && (
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Items with both 👍 and 👎, ranked by the smaller side: the closer the split and the
             more votes, the higher.
           </p>

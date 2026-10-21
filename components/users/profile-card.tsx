@@ -7,18 +7,18 @@ import { avatarName, providerLabel, type AdminUser } from "./data";
 function Detail({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="min-w-0">
-      <dt className="text-xs uppercase tracking-wider text-zinc-500">{label}</dt>
+      <dt className="text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{label}</dt>
       <dd className="mt-0.5">{children}</dd>
     </div>
   );
 }
 
 function Moment({ iso }: { iso: string | null }) {
-  if (!iso) return <span className="text-zinc-500">Never</span>;
+  if (!iso) return <span className="text-zinc-500 dark:text-zinc-400">Never</span>;
   return (
     <>
       <time dateTime={iso}>{formatDateTime(iso)}</time>
-      <span className="block text-xs text-zinc-500">{timeAgo(iso)}</span>
+      <span className="block text-xs text-zinc-500 dark:text-zinc-400">{timeAgo(iso)}</span>
     </>
   );
 }
@@ -37,15 +37,15 @@ export function ProfileCard({ user, isYou }: { user: AdminUser; isYou: boolean }
         <div className="w-full min-w-0 flex-1">
           <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
             <h1 className="min-w-0 break-words text-2xl font-semibold tracking-tight">
-              {name || <span className="italic text-zinc-500">No name yet</span>}
+              {name || <span className="italic text-zinc-500 dark:text-zinc-400">No name yet</span>}
             </h1>
             {user.is_superadmin && <Badge tone="violet">Superadmin</Badge>}
             {isYou && <Badge tone="blue">You</Badge>}
           </div>
-          <p className="mt-0.5 break-all text-sm text-zinc-500">{user.email ?? "No email on file"}</p>
+          <p className="mt-0.5 break-all text-sm text-zinc-500 dark:text-zinc-400">{user.email ?? "No email on file"}</p>
           {/* The panel can't change the flag on purpose: a trigger in
               admin.sql blocks it from the app, so it can't be self-granted. */}
-          <p className="mt-2 text-xs text-zinc-500">
+          <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
             {user.is_superadmin ? "Can use this admin panel. " : "Not an admin. "}
             Admin access is granted and removed in the Supabase SQL Editor (step 8 of
             admin.sql), not here.

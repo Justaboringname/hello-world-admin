@@ -68,7 +68,7 @@ export function RatingsList({ items, offset }: { items: RatingItem[]; offset: nu
         return (
           <li key={item.key} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:gap-5">
             <div className="flex min-w-0 flex-1 items-center gap-3">
-              <span className="w-9 shrink-0 text-right text-sm font-semibold tabular-nums text-zinc-500">
+              <span className="w-9 shrink-0 text-right text-sm font-semibold tabular-nums text-zinc-500 dark:text-zinc-400">
                 #{formatNumber(offset + index + 1)}
               </span>
               {item.image ? (
@@ -86,7 +86,7 @@ export function RatingsList({ items, offset }: { items: RatingItem[]; offset: nu
                 <Link href={item.href} className="line-clamp-2 text-sm font-medium leading-snug hover:underline">
                   {item.title}
                 </Link>
-                <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-500">
+                <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400">
                   {item.meta}
                   <span className="tabular-nums">
                     · {formatNumber(votes)} {votes === 1 ? "vote" : "votes"}

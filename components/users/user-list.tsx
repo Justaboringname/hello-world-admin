@@ -10,7 +10,7 @@ function UserName({ user }: { user: AdminUser }) {
   return name ? (
     <span className="truncate font-medium">{name}</span>
   ) : (
-    <span className="truncate italic text-zinc-500">No name yet</span>
+    <span className="truncate italic text-zinc-500 dark:text-zinc-400">No name yet</span>
   );
 }
 
@@ -72,17 +72,17 @@ export function UserList({ users }: { users: AdminUser[] }) {
                     <UserName user={user} />
                     {user.is_superadmin && <Badge tone="violet">Superadmin</Badge>}
                   </p>
-                  <p className="truncate text-sm text-zinc-500">{user.email ?? "No email"}</p>
+                  <p className="truncate text-sm text-zinc-500 dark:text-zinc-400">{user.email ?? "No email"}</p>
                 </div>
               </div>
-              <p className="mt-2 text-xs text-zinc-500">
+              <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
                 {providerLabel(user.provider)} · joined <When iso={user.created_at} show="date" /> ·
                 seen <When iso={user.last_sign_in_at} show="ago" never="never" />
               </p>
               <dl className="mt-3 grid grid-cols-4 gap-2 border-t border-zinc-100 pt-3 text-center dark:border-zinc-800">
                 {COUNTS.map(({ key, label }) => (
                   <div key={key}>
-                    <dt className="text-[0.7rem] text-zinc-500">{label}</dt>
+                    <dt className="text-[0.7rem] text-zinc-500 dark:text-zinc-400">{label}</dt>
                     <dd className="font-semibold tabular-nums">{formatNumber(user[key])}</dd>
                   </div>
                 ))}
@@ -95,7 +95,7 @@ export function UserList({ users }: { users: AdminUser[] }) {
       <div className="hidden overflow-x-auto rounded-2xl border border-zinc-200 bg-surface shadow-sm md:block dark:border-zinc-800">
         <table className="w-full text-left text-sm">
           <caption className="sr-only">Users</caption>
-          <thead className="border-b border-zinc-200 text-xs text-zinc-500 dark:border-zinc-800">
+          <thead className="border-b border-zinc-200 text-xs text-zinc-500 dark:text-zinc-400 dark:border-zinc-800">
             <tr>
               <th scope="col" className="px-4 py-3 font-medium">
                 User
@@ -129,7 +129,7 @@ export function UserList({ users }: { users: AdminUser[] }) {
                           <UserName user={user} />
                           {user.is_superadmin && <Badge tone="violet">Superadmin</Badge>}
                         </span>
-                        <span className="block truncate text-xs text-zinc-500">
+                        <span className="block truncate text-xs text-zinc-500 dark:text-zinc-400">
                           {user.email ?? "No email"}
                         </span>
                       </span>
@@ -154,7 +154,7 @@ export function UserList({ users }: { users: AdminUser[] }) {
                   </Cell>
                   {COUNTS.map(({ key }) => (
                     <Cell key={key} href={href} className="text-right tabular-nums last:pr-4">
-                      {user[key] ? formatNumber(user[key]) : <span className="text-zinc-500">0</span>}
+                      {user[key] ? formatNumber(user[key]) : <span className="text-zinc-500 dark:text-zinc-400">0</span>}
                     </Cell>
                   ))}
                 </tr>

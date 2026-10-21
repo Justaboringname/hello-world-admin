@@ -22,10 +22,11 @@ import {
 } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth";
 import { VIBES, isVibe, vibeLabel, type Vibe } from "@/lib/captions";
-import { cleanSearch, formatNumber, fullName, pageIndex, parseUuid } from "@/lib/format";
+import { cleanSearch, formatNumber, pageIndex, parseUuid } from "@/lib/format";
 import { firstParam } from "@/lib/redirect";
 import { searchOr } from "@/lib/search";
 import { createClient } from "@/lib/supabase/server";
+import { userLabel } from "@/lib/users";
 
 export const metadata: Metadata = { title: "AI media" };
 
@@ -69,12 +70,10 @@ export default async function MediaPage({ searchParams }: PageProps<"/media">) {
   }
   query = query.range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
 
-  const [result, userResult] = await Promise.all([
+  const [result, chipLabel] = await Promise.all([
     query,
     // Just for the filter chip's label.
-    userId
-      ? supabase.from("profiles").select("first_name, last_name").eq("id", userId).maybeSingle()
-      : null,
+    userId ? userLabel(supabase, userId) : null,
   ]);
 
   const photos = (result.data ?? []) as MediaRow[];
@@ -82,7 +81,7 @@ export default async function MediaPage({ searchParams }: PageProps<"/media">) {
   // PGRST103: a ?page= past the last page.
   const pastEnd = result.error?.code === "PGRST103" || (!result.error && !photos.length && page > 0);
   const error = pastEnd ? null : result.error;
-  const userName = fullName(userResult?.data) || photos[0]?.author_name || "this user";
+  const userName = chipLabel || photos[0]?.author_name || "this user";
 
   const linkParams = {
     q: q || undefined,
@@ -141,7 +140,7 @@ export default async function MediaPage({ searchParams }: PageProps<"/media">) {
         <FilterTabs label="Sort photos" items={sortTabs} />
         {userId && (
           <p className="flex flex-wrap items-center gap-2 text-sm">
-            <span className="text-zinc-500">Posted by</span>
+            <span className="text-zinc-500 dark:text-zinc-400">Posted by</span>
             <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 py-1 pl-3 pr-1 font-medium text-blue-800 dark:bg-blue-950 dark:text-blue-200">
               <Link href={`/users/${userId}`} className="hover:underline">
                 {userName}
@@ -173,7 +172,7 @@ export default async function MediaPage({ searchParams }: PageProps<"/media">) {
         </EmptyState>
       ) : (
         <>
-          <p className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm tabular-nums text-zinc-500">
+          <p className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm tabular-nums text-zinc-500 dark:text-zinc-400">
             <span>
               <span className="font-medium text-zinc-900 dark:text-zinc-100">{formatNumber(matched)}</span>{" "}
               {matched === 1 ? "photo" : "photos"}

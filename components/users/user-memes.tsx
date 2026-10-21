@@ -74,7 +74,7 @@ export function UserMemes({
                       <Badge tone="blue">🔓 Members only</Badge>
                     </span>
                   )}
-                  <span className="mt-0.5 block truncate text-xs tabular-nums text-zinc-500">
+                  <span className="mt-0.5 block truncate text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
                     👍 {formatNumber(meme.upvotes)} · 👎 {formatNumber(meme.downvotes)} ·{" "}
                     {timeAgo(meme.created_at)}
                   </span>

@@ -62,9 +62,6 @@ export function parseMediaSort(value: string | undefined): MediaSort {
   return value && Object.hasOwn(MEDIA_SORTS, value) ? (value as MediaSort) : DEFAULT_MEDIA_SORT;
 }
 
-// Captions written in the admin panel are saved with this model name, so
-// they're easy to tell apart from Gemini's.
-export const MANUAL_MODEL = "manual";
 
 // Captions and locations are saved as one tidy line. The caption editor
 // compares with the same rule, so "unsaved" means the server would save

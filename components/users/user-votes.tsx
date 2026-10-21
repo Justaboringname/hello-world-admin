@@ -19,9 +19,9 @@ function UpvoteShare({ upvotes, total }: { upvotes: number; total: number }) {
       <p className="flex flex-wrap items-baseline justify-between gap-2 text-sm tabular-nums">
         <span>
           <span className="text-lg font-semibold">{formatPercent(upvotes, total)}</span>{" "}
-          <span className="text-zinc-500">of their votes are 👍</span>
+          <span className="text-zinc-500 dark:text-zinc-400">of their votes are 👍</span>
         </span>
-        <span className="text-xs text-zinc-500">
+        <span className="text-xs text-zinc-500 dark:text-zinc-400">
           👍 {formatNumber(upvotes)} · 👎 {formatNumber(total - upvotes)}
         </span>
       </p>
@@ -82,7 +82,7 @@ export function UserVotes({
                   <Link href={voteHref(vote)} className="line-clamp-2 text-sm hover:underline">
                     {vote.kind === "caption" ? `“${vote.label}”` : vote.label}
                   </Link>
-                  <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                  <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
                     <Badge>{vote.kind === "caption" ? "✨ AI caption" : "😂 Meme"}</Badge>
                     <time dateTime={vote.created_at} title={formatDateTime(vote.created_at)}>
                       {timeAgo(vote.created_at)}

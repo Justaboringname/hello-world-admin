@@ -18,7 +18,7 @@ export function When({
   show: "date" | "ago";
   never?: string;
 }) {
-  if (!iso) return <span className="text-zinc-500">{never}</span>;
+  if (!iso) return <span className="text-zinc-500 dark:text-zinc-400">{never}</span>;
   return (
     <time dateTime={iso} title={whenTitle(iso, show)}>
       {show === "date" ? formatDate(iso) : timeAgo(iso)}

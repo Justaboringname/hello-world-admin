@@ -17,7 +17,8 @@ function quoteOrValue(value: string) {
 // "Any of these columns contains the term", for .or(). Column names must come
 // from the code, never from the request. Returns null for an empty term.
 export function searchOr(columns: readonly string[], term: string) {
-  if (!term) return null;
+  // "*" alone would become %% and match everything.
+  if (!escapeLike(term)) return null;
   const pattern = quoteOrValue(`%${escapeLike(term)}%`);
   return columns.map((column) => `${column}.ilike.${pattern}`).join(",");
 }

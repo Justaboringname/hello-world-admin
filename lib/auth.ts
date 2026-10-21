@@ -21,11 +21,15 @@ export type AdminCheck =
 // page and the header share one lookup.
 export const checkAdmin = cache(async (): Promise<AdminCheck> => {
   const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const claims = data?.claims;
-  if (!claims) return { status: "signed-out" };
+  // getUser() asks Supabase Auth rather than only checking the token's
+  // signature (getClaims), so a session that was signed out elsewhere stops
+  // working right away instead of when its token expires. Worth one extra
+  // request in an app that can delete anyone's posts.
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+  if (!user) return { status: "signed-out" };
 
-  const email = typeof claims.email === "string" ? claims.email : null;
+  const email = user.email ?? null;
   const { data: isAdmin, error } = await supabase.rpc("is_superadmin");
   if (error || isAdmin !== true) {
     // PGRST202: PostgREST can't find the function.
@@ -35,7 +39,7 @@ export const checkAdmin = cache(async (): Promise<AdminCheck> => {
   const { data: profile } = await supabase
     .from("profiles")
     .select("first_name, last_name, avatar_url")
-    .eq("id", claims.sub)
+    .eq("id", user.id)
     .maybeSingle();
 
   const name =
@@ -46,7 +50,7 @@ export const checkAdmin = cache(async (): Promise<AdminCheck> => {
   return {
     status: "admin",
     admin: {
-      userId: claims.sub,
+      userId: user.id,
       email,
       name,
       avatarUrl: profile?.avatar_url ?? null,

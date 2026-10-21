@@ -19,7 +19,7 @@ export default async function DeniedPage() {
       <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-surface p-8 text-center shadow-sm dark:border-zinc-800">
         <Logo className="mx-auto mb-4 h-12 w-12" />
         <h1 className="text-2xl font-semibold tracking-tight">This account isn&apos;t an admin</h1>
-        <p className="mt-2 text-sm text-zinc-500">
+        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
           {check.email ? (
             <>
               You&apos;re signed in as <span className="font-medium text-zinc-700 dark:text-zinc-300">{check.email}</span>.

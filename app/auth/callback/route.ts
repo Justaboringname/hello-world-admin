@@ -13,10 +13,11 @@ export async function GET(request: NextRequest) {
   const next = safeNextPath(cookieStore.get(NEXT_PATH_COOKIE)?.value);
   cookieStore.delete(NEXT_PATH_COOKIE);
 
-  const fail = (message: string) =>
-    NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent(message)}`, request.url),
-    );
+  // The login page shows a fixed message; the reason goes to the server log.
+  const fail = (message: string) => {
+    console.error(`Admin sign-in failed: ${message}`);
+    return NextResponse.redirect(new URL("/login?error=1", request.url));
+  };
 
   if (!code) {
     return fail(searchParams.get("error_description") ?? "Missing sign-in code.");

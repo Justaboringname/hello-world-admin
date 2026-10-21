@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { AUTH_COOKIE_OPTIONS } from "./cookie-options";
 import { supabaseEnv } from "./env";
 
 // Auth-aware client for Server Components, Server Functions and Route Handlers.
@@ -9,6 +10,7 @@ export async function createClient() {
   const { url, anonKey } = supabaseEnv();
 
   return createServerClient(url, anonKey, {
+    cookieOptions: AUTH_COOKIE_OPTIONS,
     cookies: {
       getAll() {
         return cookieStore.getAll();

@@ -25,7 +25,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
           Admin panel
         </p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">Sign in</h1>
-        <p className="mt-2 text-sm text-zinc-500">
+        <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
           Superadmins only. Use the Google account you sign in to the app with.
         </p>
 
@@ -40,9 +40,11 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
           </SubmitButton>
         </form>
 
-        {error && (
+        {/* A fixed message: ?error= is part of the URL, so anyone could put
+            their own words on this page. The details are in the server log. */}
+        {error !== undefined && (
           <p role="alert" className="mt-4 text-sm text-red-600">
-            Sign-in failed: {error}
+            Sign-in didn&apos;t work. Please try again.
           </p>
         )}
       </div>

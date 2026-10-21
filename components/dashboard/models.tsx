@@ -1,5 +1,6 @@
-import { formatNumber } from "@/lib/format";
+import { MANUAL_MODEL } from "@/lib/captions";
 import type { Dashboard } from "@/lib/dashboard";
+import { formatNumber } from "@/lib/format";
 import { SERIES } from "./colors";
 import { HBar } from "./bar";
 import { FEW_VOTES, averageScore, fraction, percent, share } from "./numbers";
@@ -12,6 +13,8 @@ export function modelStats(models: Dashboard["models"]) {
       const down = Number(row.downvotes);
       return {
         model: row.model,
+        // Captions an admin wrote on /media/new: listed, but never a "model".
+        manual: row.model === MANUAL_MODEL,
         photos: Number(row.photos),
         votes: up + down,
         rate: share(up, up + down),
@@ -24,9 +27,10 @@ export function modelStats(models: Dashboard["models"]) {
 
 type Stats = ReturnType<typeof modelStats>;
 
-export function modelHeadline({ rows, photos }: Stats) {
-  if (rows.length === 0) return "No photos yet";
-  if (rows.length === 1) return `Every photo so far was captioned by ${rows[0]!.model}`;
+export function modelHeadline({ rows: all, photos }: Stats) {
+  const rows = all.filter((row) => !row.manual);
+  if (rows.length === 0) return all.length ? "Every photo so far was captioned by hand" : "No photos yet";
+  if (all.length === 1) return `Every photo so far was captioned by ${rows[0]!.model}`;
   // Only compare models with enough votes: a fallback model that answered
   // once shouldn't win on a single 👍.
   const scored = rows.filter((row) => row.votes >= FEW_VOTES && row.avg !== null);
@@ -45,7 +49,11 @@ export function ModelBoard({ stats }: { stats: Stats }) {
       {stats.rows.map((row) => (
         <li key={row.model}>
           <div className="flex items-baseline justify-between gap-2 text-sm">
-            <code className="min-w-0 truncate font-mono text-[13px] font-medium">{row.model}</code>
+            {row.manual ? (
+              <span className="min-w-0 truncate font-medium">✍️ Written by an admin</span>
+            ) : (
+              <code className="min-w-0 truncate font-mono text-[13px] font-medium">{row.model}</code>
+            )}
             <span className="shrink-0 tabular-nums">
               <strong className="font-semibold">{formatNumber(row.photos)}</strong>{" "}
               <span className="text-xs text-zinc-500 dark:text-zinc-400">

@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui";
-import { vibeLabel } from "@/lib/captions";
+import { MANUAL_MODEL, vibeLabel } from "@/lib/captions";
 import { formatNumber, scoreTone, signedScore } from "@/lib/format";
 import { photoUrl } from "@/lib/storage";
 import { timeAgo } from "@/lib/time";
-import { MANUAL_MODEL, photoAlt, plural, type MediaRow } from "./data";
+import { photoAlt, plural, type MediaRow } from "./data";
 import { VoteTally } from "./vote-tally";
 
 // One photo in the /media grid. The whole card opens its admin page.
@@ -37,7 +37,7 @@ export function MediaCard({ photo }: { photo: MediaRow }) {
           {photo.top_caption ? (
             <>“{photo.top_caption}”</>
           ) : (
-            <span className="italic text-zinc-500">No captions</span>
+            <span className="italic text-zinc-500 dark:text-zinc-400">No captions</span>
           )}
         </span>
 
@@ -48,7 +48,7 @@ export function MediaCard({ photo }: { photo: MediaRow }) {
           </Badge>
         </span>
 
-        <span className="mt-auto flex flex-col gap-1 text-xs text-zinc-500">
+        <span className="mt-auto flex flex-col gap-1 text-xs text-zinc-500 dark:text-zinc-400">
           <span className="truncate">
             {photo.location && <>📍 {photo.location} · </>}
             {photo.author_name ? `by ${photo.author_name}` : "by an unnamed user"} ·{" "}

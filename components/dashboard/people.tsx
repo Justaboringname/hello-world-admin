@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
-import { formatNumber } from "@/lib/format";
 import type { Dashboard } from "@/lib/dashboard";
+import { formatNumber } from "@/lib/format";
 import { percent, personName, share } from "./numbers";
 import { NoData, Rank } from "./panel";
 

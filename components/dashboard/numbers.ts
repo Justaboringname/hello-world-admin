@@ -1,5 +1,5 @@
-import { formatNumber } from "@/lib/format";
 import type { Dashboard } from "@/lib/dashboard";
+import { formatNumber } from "@/lib/format";
 
 // Number helpers for the dashboard. A new database has lots of zeros and
 // nulls, so every ratio here has an answer for "nothing to divide by".

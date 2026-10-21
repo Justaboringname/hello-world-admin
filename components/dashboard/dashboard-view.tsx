@@ -1,6 +1,6 @@
-import { formatDateTime, formatNumber } from "@/lib/format";
 import { vibeLabel } from "@/lib/captions";
 import type { Dashboard } from "@/lib/dashboard";
+import { formatDateTime, formatNumber } from "@/lib/format";
 import { ActivityChart } from "./activity-chart";
 import { AiVsHumans, compareKinds } from "./ai-vs-humans";
 import { SERIES, SIGNUPS_TRACK } from "./colors";
@@ -81,6 +81,38 @@ function kindsHeadline({ ai, humans, winner }: ReturnType<typeof compareKinds>) 
     : `AI wins: Gemini's captions get 👍 ${percent(ai.rate)} of the time, memes ${percent(humans.rate)}`;
 }
 
+const andList = new Intl.ListFormat("en", { type: "conjunction" });
+
+// The names sharing first place, or null when there's a clear leader. Up to
+// three are named; beyond that the count says it ("4 spots").
+function tiedLeaders<T>(
+  rows: T[],
+  value: (row: T) => number,
+  name: (row: T) => string,
+  noun: string,
+) {
+  const top = rows.filter((row) => value(row) === value(rows[0]!));
+  if (top.length < 2) return null;
+  return top.length <= 3 ? andList.format(top.map(name)) : `${top.length} ${noun}`;
+}
+
+function creatorHeadline(creators: Dashboard["top_creators"]) {
+  const [top] = creators;
+  if (!top) return "Nobody has posted yet";
+  if (top.upvotes <= 0) return "No 👍 on anyone's posts yet";
+  const tied = tiedLeaders(creators, (c) => c.upvotes, (c) => personName(c.name), "people");
+  return tied
+    ? `${tied} share the most 👍 (${formatNumber(top.upvotes)} each)`
+    : `${personName(top.name)} has earned the most 👍 (${formatNumber(top.upvotes)})`;
+}
+
+function locationHeadline(locations: Dashboard["locations"]) {
+  const [top] = locations;
+  if (!top) return "No locations yet";
+  const tied = tiedLeaders(locations, (l) => l.photos, (l) => l.location, "spots");
+  return tied ? `📍 ${tied} tie for the top spot` : `📍 ${top.location} is the top spot`;
+}
+
 function awardsHeadline(awards: Dashboard["awards"]) {
   const { harshest_critic: critic, biggest_fan: fan, night_owl: owl } = awards;
   if (critic) {
@@ -114,9 +146,7 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
   const topCaption = d.top_captions[0];
   const splitCaption = d.divisive_captions[0];
   const topMeme = d.top_memes[0];
-  const topCreator = d.top_creators[0];
   const topVoter = d.top_voters[0];
-  const topSpot = d.locations[0];
 
   return (
     <div className="space-y-4">
@@ -316,13 +346,7 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
         <Panel
           id="creators"
           topic="Top creators"
-          title={
-            topCreator && topCreator.upvotes > 0
-              ? `${personName(topCreator.name)} has earned the most 👍 (${formatNumber(topCreator.upvotes)})`
-              : topCreator
-                ? "No 👍 on anyone's posts yet"
-                : "Nobody has posted yet"
-          }
+          title={creatorHeadline(d.top_creators)}
           description="👍 on their photos' captions and on their memes."
         >
           {d.top_creators.length ? (
@@ -357,7 +381,7 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
         <Panel
           id="locations"
           topic="Where people post from"
-          title={topSpot ? `📍 ${topSpot.location} is the top spot` : "No locations yet"}
+          title={locationHeadline(d.locations)}
           description="The 8 most common, as people typed them, with their share of all photos."
         >
           {d.locations.length ? (

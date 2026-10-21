@@ -20,8 +20,8 @@ import {
   VIBES,
   type Vibe,
 } from "@/lib/captions";
-import { resizeImage } from "@/lib/resize-image";
 import { ActionMessage } from "@/components/action-message";
+import { resizeImage } from "@/lib/resize-image";
 
 type Mode = "gemini" | "manual";
 
@@ -118,7 +118,7 @@ export function CreateMediaForm() {
           onClick={() => inputRef.current?.click()}
           disabled={pending}
           aria-describedby="photo-hint"
-          className="group relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-zinc-300 bg-surface text-zinc-500 transition hover:border-blue-500 hover:text-blue-600 disabled:cursor-wait dark:border-zinc-700 dark:hover:text-blue-400"
+          className="group relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-zinc-300 bg-surface text-zinc-500 dark:text-zinc-400 transition hover:border-blue-500 hover:text-blue-600 disabled:cursor-wait dark:border-zinc-700 dark:hover:text-blue-400"
         >
           {previewUrl ? (
             <>
@@ -137,7 +137,7 @@ export function CreateMediaForm() {
             </span>
           )}
         </button>
-        <p id="photo-hint" className="mt-2 text-xs text-zinc-500">
+        <p id="photo-hint" className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
           JPEG, PNG or WebP. It&apos;s shrunk to 1600 px in your browser before uploading.
         </p>
         {photoError && (
@@ -166,7 +166,7 @@ export function CreateMediaForm() {
               </span>
               <span>
                 <span className="block font-medium">{VIBES[key].label}</span>
-                <span className="block text-sm text-zinc-500">{VIBES[key].blurb}</span>
+                <span className="block text-sm text-zinc-500 dark:text-zinc-400">{VIBES[key].blurb}</span>
               </span>
             </label>
           ))}
@@ -174,7 +174,7 @@ export function CreateMediaForm() {
       </fieldset>
 
       <label className="text-sm font-medium">
-        Location <span className="font-normal text-zinc-500">(optional)</span>
+        Location <span className="font-normal text-zinc-500 dark:text-zinc-400">(optional)</span>
         <input
           name="location"
           maxLength={LOCATION_MAX_LENGTH}
@@ -202,7 +202,7 @@ export function CreateMediaForm() {
               </span>
               <span>
                 <span className="block font-medium">{MODES[key].label}</span>
-                <span className="block text-sm text-zinc-500">{MODES[key].blurb}</span>
+                <span className="block text-sm text-zinc-500 dark:text-zinc-400">{MODES[key].blurb}</span>
               </span>
             </label>
           ))}
@@ -217,7 +217,7 @@ export function CreateMediaForm() {
         className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-surface p-4 dark:border-zinc-800"
       >
         <legend className="sr-only">Your captions</legend>
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Up to {MAX_CAPTIONS}, {CAPTION_MAX_LENGTH} characters each. Empty boxes are skipped.
         </p>
         {Array.from({ length: captionBoxes }, (_, index) => (
@@ -252,7 +252,7 @@ export function CreateMediaForm() {
               : "Create photo"}
         </button>
         {pending && mode === "gemini" && (
-          <p className="text-sm text-zinc-500">This can take up to a minute when Gemini is busy.</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">This can take up to a minute when Gemini is busy.</p>
         )}
       </div>
 

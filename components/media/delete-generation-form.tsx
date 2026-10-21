@@ -2,9 +2,9 @@
 
 import { useActionState } from "react";
 import { deleteGeneration } from "@/app/(admin)/media/actions";
+import { ActionMessage } from "@/components/action-message";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { IDLE } from "@/lib/action-state";
-import { ActionMessage } from "@/components/action-message";
 import { plural } from "./data";
 
 // On success the action redirects to /media, so only errors come back here.

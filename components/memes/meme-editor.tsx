@@ -2,10 +2,10 @@
 
 import { startTransition, useActionState, useId, useState, type FormEvent } from "react";
 import { updateMeme } from "@/app/(admin)/memes/actions";
+import { ActionMessage } from "@/components/action-message";
 import { Badge } from "@/components/ui";
 import { IDLE } from "@/lib/action-state";
 import { MEME_TEXT_MAX_LENGTH, MEME_TITLE_MAX_LENGTH } from "@/lib/captions";
-import { ActionMessage } from "@/components/action-message";
 import { memeAlt } from "./data";
 import { MemeImage } from "./meme-image";
 
@@ -84,7 +84,7 @@ export function MemeEditor({
           bottomText={bottomText || null}
         />
         {dirty && (
-          <figcaption className="flex items-center gap-2 px-4 py-2 text-sm text-zinc-500">
+          <figcaption className="flex items-center gap-2 px-4 py-2 text-sm text-zinc-500 dark:text-zinc-400">
             <Badge tone="amber">Preview</Badge> Not saved yet
           </figcaption>
         )}
@@ -97,7 +97,7 @@ export function MemeEditor({
         <h2 id={`${id}-heading`} className="font-semibold">
           Edit meme
         </h2>
-        <p className="mt-0.5 text-sm text-zinc-500">
+        <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
           The text and who can see it. The image, author and votes stay as posted.
         </p>
 
@@ -120,7 +120,7 @@ export function MemeEditor({
             <label className="text-sm font-medium">
               <span className="flex items-baseline justify-between gap-2">
                 <span>
-                  Top text <span className="font-normal text-zinc-500">(optional)</span>
+                  Top text <span className="font-normal text-zinc-500 dark:text-zinc-400">(optional)</span>
                 </span>
                 <Counter length={topText.length} max={MEME_TEXT_MAX_LENGTH} />
               </span>
@@ -135,7 +135,7 @@ export function MemeEditor({
             <label className="text-sm font-medium">
               <span className="flex items-baseline justify-between gap-2">
                 <span>
-                  Bottom text <span className="font-normal text-zinc-500">(optional)</span>
+                  Bottom text <span className="font-normal text-zinc-500 dark:text-zinc-400">(optional)</span>
                 </span>
                 <Counter length={bottomText.length} max={MEME_TEXT_MAX_LENGTH} />
               </span>
@@ -159,7 +159,7 @@ export function MemeEditor({
             />
             <span>
               <span className="block font-medium">🔓 Members only</span>
-              <span className="block text-zinc-500">
+              <span className="block text-zinc-500 dark:text-zinc-400">
                 Hidden from signed-out visitors. Everyone signed in still sees it.
               </span>
             </span>

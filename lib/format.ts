@@ -51,10 +51,15 @@ export function fullName(
   return [person?.first_name, person?.last_name].filter(Boolean).join(" ");
 }
 
-// A search box value, tidied: one line, no runaway length. lib/search.ts
-// makes it safe for PostgREST filters.
+// A search box value, tidied: one line, no control characters (a NUL would
+// cut the pattern short in Postgres), no runaway length. lib/search.ts makes
+// it safe for PostgREST filters.
 export function cleanSearch(value: string | undefined, maxLength = 80) {
-  return (value ?? "").replace(/\s+/g, " ").trim().slice(0, maxLength);
+  return (value ?? "")
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, maxLength);
 }
 
 // ?page=3 -> 2 (zero-based). Anything odd falls back to the first page.

@@ -14,6 +14,12 @@ export default async function AdminLayout({ children }: LayoutProps<"/">) {
 
   return (
     <div className="min-h-screen font-sans lg:flex">
+      <a
+        href="#content"
+        className="sr-only z-50 rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white focus:not-sr-only focus:fixed focus:left-3 focus:top-3 dark:bg-white dark:text-zinc-900"
+      >
+        Skip to content
+      </a>
       <aside className="sticky top-0 z-30 border-b border-zinc-200/80 bg-white/90 backdrop-blur-md lg:h-screen lg:w-60 lg:shrink-0 lg:border-b-0 lg:border-r dark:border-zinc-800/80 dark:bg-zinc-950/85">
         <div className="flex h-full flex-col gap-3 px-3 py-3 lg:gap-6 lg:py-5">
           <div className="flex items-center justify-between gap-2 px-1">
@@ -41,7 +47,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/">) {
               <Avatar src={admin.avatarUrl} name={admin.name} />
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{admin.name}</p>
-                <p className="truncate text-xs text-zinc-500">{admin.email}</p>
+                <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{admin.email}</p>
               </div>
             </div>
             <form action={signOut} className="mt-3">
@@ -56,7 +62,9 @@ export default async function AdminLayout({ children }: LayoutProps<"/">) {
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-8">{children}</main>
+      <main id="content" className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+        {children}
+      </main>
     </div>
   );
 }

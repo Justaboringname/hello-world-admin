@@ -16,11 +16,11 @@ export function StatTile({
 }) {
   const body = (
     <>
-      <span className="block text-xs uppercase tracking-wider text-zinc-500">{label}</span>
+      <span className="block text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{label}</span>
       <span className="mt-1 block text-3xl font-semibold tabular-nums" title={formatNumber(value)}>
         {formatCompact(value)}
       </span>
-      {hint && <span className="mt-0.5 block text-xs text-zinc-500">{hint}</span>}
+      {hint && <span className="mt-0.5 block text-xs text-zinc-500 dark:text-zinc-400">{hint}</span>}
     </>
   );
   const className =

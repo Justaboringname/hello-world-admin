@@ -34,6 +34,13 @@ html {
   }
 }
 
+/* One focus ring for everything, visible on white text and dark chips alike
+   (the browser default takes the text color). */
+:focus-visible {
+  outline: 2px solid var(--color-blue-500, #3b82f6);
+  outline-offset: 2px;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

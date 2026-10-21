@@ -9,17 +9,17 @@ import {
   type KeyboardEvent,
 } from "react";
 import { addCaption, deleteCaption, updateCaption } from "@/app/(admin)/media/actions";
+import { ActionMessage } from "@/components/action-message";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { Badge } from "@/components/ui";
 import { IDLE, type ActionState } from "@/lib/action-state";
 import { CAPTION_MAX_LENGTH, type Caption } from "@/lib/captions";
-import { ActionMessage } from "@/components/action-message";
+import { scoreTone, signedScore } from "@/lib/format";
 import { plural, tidyText } from "./data";
 import { VoteTally } from "./vote-tally";
-import { scoreTone, signedScore } from "@/lib/format";
 
 const textareaClass =
-  "w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base leading-snug outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900";
+  "w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base leading-snug outline-none [field-sizing:content] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900";
 
 // Newlines are dropped when saving anyway, so Enter saves (Shift+Enter still
 // works for anyone who expects it to). requestSubmit() ignores a disabled
@@ -84,7 +84,7 @@ export function CaptionEditor({
           <textarea
             id={`${formId}-text`}
             name="text"
-            rows={2}
+            rows={3}
             required
             maxLength={CAPTION_MAX_LENGTH}
             value={text}
@@ -95,7 +95,7 @@ export function CaptionEditor({
         </form>
 
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm tabular-nums text-zinc-500">
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm tabular-nums text-zinc-500 dark:text-zinc-400">
             {isTop && <Badge tone="amber">👑 Top caption</Badge>}
             <VoteTally upvotes={caption.upvotes} downvotes={caption.downvotes} />
             <Badge tone={scoreTone(caption.score)}>Score {signedScore(caption.score)}</Badge>
@@ -191,7 +191,7 @@ export function AddCaptionForm({ generationId, position }: { generationId: numbe
         <textarea
           id={`new-caption-${generationId}`}
           name="text"
-          rows={2}
+          rows={3}
           required
           maxLength={CAPTION_MAX_LENGTH}
           placeholder="Write another caption…"
@@ -201,7 +201,7 @@ export function AddCaptionForm({ generationId, position }: { generationId: numbe
           className={textareaClass}
         />
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-zinc-500 dark:text-zinc-400">
             <Counter length={tidyText(text).length} /> · starts at 0 votes
           </span>
           <button

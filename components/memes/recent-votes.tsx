@@ -51,13 +51,13 @@ export function RecentVotes({
                 <Link href={`/users/${vote.user_id}`} className="group flex min-w-0 flex-1 items-center gap-2.5">
                   <Avatar src={vote.voter_avatar_url} name={name} />
                   <span
-                    className={`truncate text-sm group-hover:underline ${vote.voter_name ? "font-medium" : "italic text-zinc-500"}`}
+                    className={`truncate text-sm group-hover:underline ${vote.voter_name ? "font-medium" : "italic text-zinc-500 dark:text-zinc-400"}`}
                   >
                     {name}
                   </span>
                 </Link>
                 <VoteIcon vote={vote.vote} />
-                <span className="shrink-0 text-xs text-zinc-500">
+                <span className="shrink-0 text-xs text-zinc-500 dark:text-zinc-400">
                   <VoteTime vote={vote} />
                 </span>
               </li>

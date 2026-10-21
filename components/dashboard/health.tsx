@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { formatNumber } from "@/lib/format";
 import type { Dashboard } from "@/lib/dashboard";
+import { formatNumber } from "@/lib/format";
 import { decimal, formatWait, percent, share } from "./numbers";
 
 type Fact = {

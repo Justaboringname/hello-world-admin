@@ -27,7 +27,7 @@ function Tile({
     <div
       className={`flex min-w-0 flex-col rounded-2xl border border-zinc-200 bg-surface p-4 shadow-sm dark:border-zinc-800 ${className}`}
     >
-      <span className="text-xs uppercase tracking-wider text-zinc-500">{label}</span>
+      <span className="text-xs uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{label}</span>
       <span
         className="mt-1 text-3xl font-semibold tracking-tight"
         title={typeof value === "number" ? formatNumber(value) : undefined}
@@ -35,7 +35,7 @@ function Tile({
         {value === null ? "–" : typeof value === "number" ? formatCompact(value) : value}
       </span>
       {children}
-      <span className="mt-auto pt-1 text-xs text-zinc-500">
+      <span className="mt-auto pt-1 text-xs text-zinc-500 dark:text-zinc-400">
         {value === null ? "Couldn't count these" : hint}
       </span>
     </div>

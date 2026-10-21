@@ -2,9 +2,9 @@
 
 import { startTransition, useActionState, type FormEvent } from "react";
 import { updateGeneration } from "@/app/(admin)/media/actions";
+import { ActionMessage } from "@/components/action-message";
 import { IDLE } from "@/lib/action-state";
 import { LOCATION_MAX_LENGTH, VIBES, isVibe, type Vibe } from "@/lib/captions";
-import { ActionMessage } from "@/components/action-message";
 
 const fieldClass =
   "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900";
@@ -37,7 +37,7 @@ export function GenerationDetailsForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <label className="text-sm font-medium">
-        Location <span className="font-normal text-zinc-500">(optional)</span>
+        Location <span className="font-normal text-zinc-500 dark:text-zinc-400">(optional)</span>
         <input
           name="location"
           defaultValue={location ?? ""}

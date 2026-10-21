@@ -1,5 +1,5 @@
-import { formatNumber } from "@/lib/format";
 import type { Dashboard } from "@/lib/dashboard";
+import { formatNumber } from "@/lib/format";
 import { DOWN, UP } from "./colors";
 import { FEW_VOTES, decimal, percent, share } from "./numbers";
 import { Legend } from "./panel";
@@ -78,7 +78,8 @@ export function AiVsHumans({
         {classics > 0 && (
           <>
             {" "}
-            Memes include the {formatNumber(classics)} seeded {classics === 1 ? "classic" : "classics"}.
+            Memes are the ones people made; the {formatNumber(classics)} seeded{" "}
+            {classics === 1 ? "classic isn't" : "classics aren't"} counted.
           </>
         )}
       </p>

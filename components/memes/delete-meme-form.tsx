@@ -2,10 +2,10 @@
 
 import { useActionState } from "react";
 import { deleteMeme } from "@/app/(admin)/memes/actions";
+import { ActionMessage } from "@/components/action-message";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { IDLE } from "@/lib/action-state";
 import { formatNumber } from "@/lib/format";
-import { ActionMessage } from "@/components/action-message";
 
 // On success the action redirects to /memes, so only errors come back here.
 export function DeleteMemeForm({

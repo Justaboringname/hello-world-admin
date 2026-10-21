@@ -10,12 +10,12 @@ import {
   type UserPhoto,
   type UserVote,
 } from "@/components/users/data";
+import { ErrorNote, hrefWith } from "@/components/ui";
 import { ProfileCard } from "@/components/users/profile-card";
 import { StatTile } from "@/components/users/stat-tile";
 import { UserMemes } from "@/components/users/user-memes";
 import { UserPhotos } from "@/components/users/user-photos";
 import { UserVotes } from "@/components/users/user-votes";
-import { ErrorNote, hrefWith } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth";
 import { formatPercent, parseUuid } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
@@ -29,7 +29,7 @@ const VOTES_SHOWN = 15;
 
 function BackLink() {
   return (
-    <Link href="/users" className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-white">
+    <Link href="/users" className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
       ← All users
     </Link>
   );
