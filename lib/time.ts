@@ -19,26 +19,3 @@ export function timeAgo(iso: string, now = Date.now()) {
   }
   return "just now";
 }
-
-// Midnight in New York, today. Our users live there, so "today" means their
-// day, not the server's (UTC on Vercel).
-export function startOfTodayInNewYork(now = new Date()) {
-  const parts = Object.fromEntries(
-    new Intl.DateTimeFormat("en-US", {
-      timeZone: "America/New_York",
-      hourCycle: "h23",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-    })
-      .formatToParts(now)
-      .map((part) => [part.type, Number(part.value)]),
-  );
-  const sinceMidnight =
-    ((parts.hour * 60 + parts.minute) * 60 + parts.second) * 1000 + now.getMilliseconds();
-  return new Date(now.getTime() - sinceMidnight);
-}
-
-export function daysAgo(days: number, now = Date.now()) {
-  return new Date(now - days * 24 * 60 * 60 * 1000);
-}

@@ -44,7 +44,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/">) {
 
           <div className="mt-auto hidden border-t border-zinc-200 pt-4 lg:block dark:border-zinc-800">
             <div className="flex items-center gap-2.5 px-1">
-              <Avatar src={admin.avatarUrl} name={admin.name} />
+              <Avatar src={admin.avatarUrl} name={admin.name} decorative />
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{admin.name}</p>
                 <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{admin.email}</p>

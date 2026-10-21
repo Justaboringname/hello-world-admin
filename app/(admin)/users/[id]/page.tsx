@@ -1,21 +1,19 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   USER_MEME_COLUMNS,
   USER_PHOTO_COLUMNS,
-  USER_VOTE_COLUMNS,
   type AdminUser,
   type UserMeme,
   type UserPhoto,
-  type UserVote,
 } from "@/components/users/data";
-import { ErrorNote, hrefWith } from "@/components/ui";
+import { BackLink, LoadError, hrefWith } from "@/components/ui";
 import { ProfileCard } from "@/components/users/profile-card";
 import { StatTile } from "@/components/users/stat-tile";
 import { UserMemes } from "@/components/users/user-memes";
 import { UserPhotos } from "@/components/users/user-photos";
 import { UserVotes } from "@/components/users/user-votes";
+import { VOTE_COLUMNS, type VoteRow } from "@/components/votes/data";
 import { requireAdmin } from "@/lib/auth";
 import { formatPercent, parseUuid } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
@@ -27,17 +25,10 @@ export const metadata: Metadata = { title: "User" };
 const GRID_SIZE = 12;
 const VOTES_SHOWN = 15;
 
-function BackLink() {
-  return (
-    <Link href="/users" className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
-      ← All users
-    </Link>
-  );
-}
-
 export default async function UserPage({ params }: PageProps<"/users/[id]">) {
-  const admin = await requireAdmin(`/users/${encodeURIComponent((await params).id)}`);
-  const userId = parseUuid((await params).id);
+  const { id } = await params;
+  const admin = await requireAdmin(`/users/${encodeURIComponent(id)}`);
+  const userId = parseUuid(id);
   if (!userId) notFound();
 
   const supabase = await createClient();
@@ -59,9 +50,12 @@ export default async function UserPage({ params }: PageProps<"/users/[id]">) {
       .limit(GRID_SIZE),
     supabase
       .from("admin_votes")
-      .select(USER_VOTE_COLUMNS)
+      .select(VOTE_COLUMNS)
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
+      // Votes cast in the same instant keep a stable order.
+      .order("kind", { ascending: true })
+      .order("item_id", { ascending: true })
       .limit(VOTES_SHOWN),
     // Just the 👍 count, for their upvote share across every vote, not only
     // the ones listed.
@@ -75,8 +69,8 @@ export default async function UserPage({ params }: PageProps<"/users/[id]">) {
   if (userResult.error) {
     return (
       <div className="space-y-4">
-        <BackLink />
-        <ErrorNote>Couldn&apos;t load this user: {userResult.error.message}</ErrorNote>
+        <BackLink href="/users">All users</BackLink>
+        <LoadError what="this user" error={userResult.error} />
       </div>
     );
   }
@@ -87,7 +81,7 @@ export default async function UserPage({ params }: PageProps<"/users/[id]">) {
 
   return (
     <div className="space-y-6">
-      <BackLink />
+      <BackLink href="/users">All users</BackLink>
       <ProfileCard user={user} isYou={user.id === admin.userId} />
 
       <section aria-label="Activity" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -134,7 +128,7 @@ export default async function UserPage({ params }: PageProps<"/users/[id]">) {
       />
       <UserVotes
         userId={user.id}
-        votes={(votesResult.data ?? []) as UserVote[]}
+        votes={(votesResult.data ?? []) as VoteRow[]}
         total={user.votes_cast}
         upvotes={upvotesCast}
         error={votesResult.error?.message ?? null}

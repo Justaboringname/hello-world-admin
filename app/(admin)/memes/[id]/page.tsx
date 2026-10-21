@@ -5,12 +5,24 @@ import { Avatar } from "@/components/avatar";
 import { MEME_COLUMNS, type MemeRow } from "@/components/memes/data";
 import { DeleteMemeForm } from "@/components/memes/delete-meme-form";
 import { MemeEditor } from "@/components/memes/meme-editor";
+import { MembersOnlyBadge } from "@/components/memes/members-only-badge";
 import { RecentVotes } from "@/components/memes/recent-votes";
-import { Badge, Card, ErrorNote, PageHeader, hrefWith } from "@/components/ui";
+import {
+  BackLink,
+  Badge,
+  Card,
+  DangerZone,
+  Detail,
+  LoadError,
+  PageHeader,
+  ViewInAppLink,
+  hrefWith,
+  linkClass,
+} from "@/components/ui";
+import { UpDownBar } from "@/components/up-down-bar";
 import { VOTE_COLUMNS, type VoteRow } from "@/components/votes/data";
-import { RatingBar } from "@/components/votes/rating-bar";
 import { requireAdmin } from "@/lib/auth";
-import { formatDateTime, formatNumber, fullName, parseId, scoreTone, signedScore } from "@/lib/format";
+import { displayName, formatDateTime, fullName, parseId, plural, scoreTone, signedScore } from "@/lib/format";
 import { mainAppUrl } from "@/lib/links";
 import { memeImageUrl } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
@@ -19,25 +31,6 @@ import { timeAgo } from "@/lib/time";
 export const metadata: Metadata = { title: "Meme" };
 
 const RECENT_VOTES = 10;
-
-const linkClass = "font-medium text-blue-600 hover:underline dark:text-blue-400";
-
-function BackLink() {
-  return (
-    <Link href="/memes" className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
-      ← All memes
-    </Link>
-  );
-}
-
-function Detail({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-0.5 py-2.5 sm:flex-row sm:gap-4">
-      <dt className="shrink-0 text-sm text-zinc-500 dark:text-zinc-400 sm:w-24">{label}</dt>
-      <dd className="min-w-0 flex-1 break-words text-sm">{children}</dd>
-    </div>
-  );
-}
 
 function When({ iso }: { iso: string }) {
   return (
@@ -48,8 +41,9 @@ function When({ iso }: { iso: string }) {
 }
 
 export default async function MemeDetailPage({ params }: PageProps<"/memes/[id]">) {
-  await requireAdmin(`/memes/${encodeURIComponent((await params).id)}`);
-  const id = parseId((await params).id);
+  const { id: idParam } = await params;
+  await requireAdmin(`/memes/${encodeURIComponent(idParam)}`);
+  const id = parseId(idParam);
   if (!id) notFound();
 
   const supabase = await createClient();
@@ -67,12 +61,10 @@ export default async function MemeDetailPage({ params }: PageProps<"/memes/[id]"
 
   if (memeResult.error) {
     return (
-      <>
-        <BackLink />
-        <div className="mt-4">
-          <ErrorNote>Couldn&apos;t load this meme: {memeResult.error.message}</ErrorNote>
-        </div>
-      </>
+      <div className="space-y-4">
+        <BackLink href="/memes">All memes</BackLink>
+        <LoadError what="this meme" error={memeResult.error} />
+      </div>
     );
   }
   const meme = memeResult.data as MemeRow | null;
@@ -91,39 +83,27 @@ export default async function MemeDetailPage({ params }: PageProps<"/memes/[id]"
     | { first_name: string | null; last_name: string | null; avatar_url: string | null }
     | null
     | undefined;
-  const authorName = fullName(profile) || meme.author_name || "Unnamed user";
+  const authorName = fullName(profile) || displayName(meme.author_name);
 
   const votes = (votesResult.data ?? []) as VoteRow[];
   const voteCount = meme.upvotes + meme.downvotes;
   const appUrl = mainAppUrl(`/m/${meme.id}`);
 
   return (
-    <>
-      <BackLink />
-      <div className="mt-3">
-        <PageHeader
-          title={meme.title}
-          description={
-            <span className="mt-1 flex flex-wrap gap-1.5">
-              {meme.user_id ? <Badge>👤 Posted by {authorName}</Badge> : <Badge tone="amber">🖼️ Classic</Badge>}
-              {meme.members_only && <Badge tone="blue">🔓 Members only</Badge>}
-              <Badge tone={scoreTone(meme.score)}>Score {signedScore(meme.score)}</Badge>
-            </span>
-          }
-          actions={
-            appUrl && (
-              <a
-                href={appUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
-              >
-                View in app ↗
-              </a>
-            )
-          }
-        />
-      </div>
+    <div className="space-y-6">
+      <BackLink href="/memes">All memes</BackLink>
+
+      <PageHeader
+        title={meme.title}
+        description={
+          <span className="mt-1 flex flex-wrap gap-1.5">
+            {meme.user_id ? <Badge>👤 Posted by {authorName}</Badge> : <Badge tone="amber">🖼️ Classic</Badge>}
+            {meme.members_only && <MembersOnlyBadge />}
+            <Badge tone={scoreTone(meme.score)}>Score {signedScore(meme.score)}</Badge>
+          </span>
+        }
+        actions={appUrl && <ViewInAppLink href={appUrl} />}
+      />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_26rem]">
         <MemeEditor
@@ -144,7 +124,7 @@ export default async function MemeDetailPage({ params }: PageProps<"/memes/[id]"
                 {meme.user_id ? (
                   <span className="flex flex-col gap-1">
                     <Link href={`/users/${meme.user_id}`} className="group flex items-center gap-2.5">
-                      <Avatar src={profile?.avatar_url} name={authorName} />
+                      <Avatar src={profile?.avatar_url} name={authorName} decorative />
                       <span className="font-medium group-hover:underline">{authorName}</span>
                     </Link>
                     <Link href={hrefWith("/memes", { user: meme.user_id })} className={`text-xs ${linkClass}`}>
@@ -186,30 +166,18 @@ export default async function MemeDetailPage({ params }: PageProps<"/memes/[id]"
                 )}
               </Detail>
               <Detail label="Votes">
-                <div className="tabular-nums">
-                  {formatNumber(voteCount)} {voteCount === 1 ? "vote" : "votes"}
-                </div>
+                <div className="tabular-nums">{plural(voteCount, "vote")}</div>
                 <div className="mt-2">
-                  <RatingBar up={meme.upvotes} down={meme.downvotes} />
+                  <UpDownBar up={meme.upvotes} down={meme.downvotes} showCounts />
                 </div>
               </Detail>
             </dl>
           </Card>
 
-          <RecentVotes
-            title={meme.title}
-            votes={votes}
-            total={voteCount}
-            error={votesResult.error ? votesResult.error.message || "the database didn't answer." : null}
-          />
+          <RecentVotes title={meme.title} votes={votes} total={voteCount} error={votesResult.error} />
 
-          <Card
-            title="Delete"
-            description={
-              meme.image_path
-                ? "Removes the meme, its votes and its uploaded image."
-                : "Removes the meme and its votes."
-            }
+          <DangerZone
+            description={`Deletes the meme for everyone, with its ${plural(voteCount, "vote")}.${meme.image_path ? " The uploaded image is removed from Storage too." : ""}`}
           >
             <DeleteMemeForm
               memeId={meme.id}
@@ -217,9 +185,9 @@ export default async function MemeDetailPage({ params }: PageProps<"/memes/[id]"
               voteCount={voteCount}
               uploaded={Boolean(meme.image_path)}
             />
-          </Card>
+          </DangerZone>
         </div>
       </div>
-    </>
+    </div>
   );
 }

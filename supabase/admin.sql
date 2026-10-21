@@ -4,6 +4,8 @@
 --   profiles.is_superadmin  who may use the admin panel. Only the SQL Editor
 --                           (or the service role) can change it
 --   is_superadmin()         true when the signed-in user is a superadmin
+--   timestamp triggers      votes and sign-ups keep the server's times, so
+--                           the dashboard can trust them
 --   admin policies          superadmins can read every profile and vote, and
 --                           create, edit and delete AI photos, captions and
 --                           memes. Nothing here loosens what anyone else can do
@@ -49,6 +51,64 @@ create trigger protect_superadmin_flag
 
 -- Only ever runs as a trigger; nobody needs to call it.
 revoke execute on function public.protect_superadmin_flag() from public, anon, authenticated;
+
+-- The dashboard's daily chart, heatmap, trends and awards are built on when
+-- people voted and signed up, but nothing stopped a user from sending their
+-- own created_at with a vote through the API. For requests from the app's
+-- roles, created_at is now the server's clock on insert and never changes
+-- after. A vote's updated_at moves only when the vote itself changes (the
+-- main app's upsert sends it on every click), so "changed" on /votes means
+-- it. The SQL Editor (postgres) can still set them, e.g. to seed test data.
+create or replace function public.stamp_vote_times()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if current_user in ('anon', 'authenticated') then
+    if tg_op = 'INSERT' then
+      new.created_at := now();
+      new.updated_at := now();
+    else
+      new.created_at := old.created_at;
+      new.updated_at := case when new.vote is distinct from old.vote then now() else old.updated_at end;
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists stamp_vote_times on public.caption_votes;
+create trigger stamp_vote_times
+  before insert or update on public.caption_votes
+  for each row execute function public.stamp_vote_times();
+
+drop trigger if exists stamp_vote_times on public.meme_votes;
+create trigger stamp_vote_times
+  before insert or update on public.meme_votes
+  for each row execute function public.stamp_vote_times();
+
+-- Same for when someone signed up: users can update their own profiles row.
+create or replace function public.pin_profile_created_at()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if current_user in ('anon', 'authenticated') then
+    new.created_at := case when tg_op = 'INSERT' then now() else old.created_at end;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists pin_profile_created_at on public.profiles;
+create trigger pin_profile_created_at
+  before insert or update on public.profiles
+  for each row execute function public.pin_profile_created_at();
+
+revoke execute on function public.stamp_vote_times(), public.pin_profile_created_at()
+  from public, anon, authenticated;
 
 -- 2. is_superadmin() -----------------------------------------------------------
 -- security definer so it can read the caller's row without going through the
@@ -341,7 +401,7 @@ set search_path = ''
 as $$
 declare
   tz constant text := 'America/New_York';
-  today date := (now() at time zone 'America/New_York')::date;
+  today date := (now() at time zone tz)::date;
   result jsonb;
 begin
   if not public.is_superadmin() then
@@ -710,13 +770,14 @@ update public.profiles
                  and u.raw_app_meta_data -> 'providers' ? 'google');
 
 -- 9. Check -----------------------------------------------------------------------
--- Who can get in (expect your email), and the policies this file added.
-select u.email as superadmin
-  from public.profiles p
-  join auth.users u on u.id = p.id
- where p.is_superadmin;
-
+-- The policies this file added, then who can get in (expect your email). The
+-- SQL Editor only shows the last result, so the superadmin list comes last.
 select tablename, policyname, cmd
   from pg_policies
  where policyname like 'Superadmins%'
  order by tablename, policyname;
+
+select u.email as superadmin
+  from public.profiles p
+  join auth.users u on u.id = p.id
+ where p.is_superadmin;

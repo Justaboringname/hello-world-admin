@@ -71,16 +71,6 @@ export type Caption = {
   score: number;
 };
 
-export type Generation = {
-  id: number;
-  author_name: string | null;
-  image_path: string;
-  location: string | null;
-  vibe: string;
-  created_at: string;
-  captions: Caption[];
-};
-
 export type Meme = {
   id: number;
   title: string;
@@ -100,12 +90,6 @@ export type Meme = {
 // lengths as a check constraint.
 export const MEME_TITLE_MAX_LENGTH = 80;
 export const MEME_TEXT_MAX_LENGTH = 100;
-
-export type GenerationDetail = Generation & {
-  system_prompt: string;
-  prompt: string;
-  model: string;
-};
 
 export function vibeLabel(vibe: string) {
   return isVibe(vibe) ? `${VIBES[vibe].emoji} ${VIBES[vibe].label}` : vibe;

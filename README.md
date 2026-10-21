@@ -24,7 +24,8 @@ checked four times:
 
 1. **[`proxy.ts`](proxy.ts)** runs before every request. Signed out → `/login`.
    Signed in but `is_superadmin()` isn't true → `/denied`. It allow-lists the
-   three public pages, so a page added later is protected by default.
+   three public pages, so a page added later is protected by default. (Link
+   prefetches skip the database check; the page they fetch makes it anyway.)
 2. **Every page** calls `requireAdmin()` from [`lib/auth.ts`](lib/auth.ts)
    before loading anything. The proxy is a fast first check, not the only one.
 3. **Every Server Action** calls `requireAdmin()` again. Actions are public
@@ -38,7 +39,12 @@ checked four times:
 The database also limits what an admin can change. Column privileges allow
 only a photo's location and vibe, a caption's text and a meme's text and
 members-only flag. Vote totals still only change through votes, and authors,
-prompts and dates can't be rewritten.
+prompts and dates can't be rewritten. Triggers keep the server's time on
+votes and sign-ups, so nobody can backdate a vote to skew the dashboard.
+
+The session cookie is HttpOnly (the panel never calls Supabase from the
+browser) and has its own name, so on localhost it doesn't collide with the
+main app's.
 
 ### "Won't I be locked out?"
 
@@ -77,10 +83,9 @@ statement again to add admins, or set the flag to `false` to remove one.
 
 In the Supabase SQL Editor, after the main app's files, run
 [`supabase/admin.sql`](supabase/admin.sql). Put your Google email in step 8
-first, or edit and run just that statement afterwards. Sign in to the main app
-once before running it, so you have a profile. The file is safe to re-run.
-It ends by listing the superadmins (expect your email) and the policies it
-added.
+first, or edit and run just that statement afterwards. Sign in with Google
+once before running it (to either app), so you have a profile. The file is
+safe to re-run. Its last result lists the superadmins: expect your email.
 
 ### 2. Supabase Auth
 

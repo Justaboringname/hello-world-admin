@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, type KeyboardEvent } from "react";
-import { formatCompact, formatNumber } from "@/lib/format";
+import { formatCompact, formatNumber, plural } from "@/lib/format";
 import { SERIES, type SeriesKey } from "./colors";
-import { dayLabel, fraction, niceMax, plural } from "./numbers";
+import { dayLabel, fraction, niceMax } from "./numbers";
 
 export type ActivityDay = {
   day: string;
@@ -81,7 +81,7 @@ export function ActivityChart({ days }: { days: ActivityDay[] }) {
       onPointerLeave={(event) => {
         if (event.pointerType === "mouse") setActive(null);
       }}
-      className="relative rounded-lg outline-offset-4 focus-visible:outline-2 focus-visible:outline-blue-500"
+      className="relative rounded-lg"
     >
       {PANELS.map((panel) => (
         <Strip

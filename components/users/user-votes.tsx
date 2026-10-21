@@ -1,19 +1,15 @@
 import Link from "next/link";
-import { Badge, Card, EmptyState, ErrorNote, hrefWith } from "@/components/ui";
-import { formatDateTime, formatNumber, formatPercent } from "@/lib/format";
-import { timeAgo } from "@/lib/time";
-import type { UserVote } from "./data";
+import { Card, EmptyState, ErrorNote, hrefWith } from "@/components/ui";
+import { UpDownBar } from "@/components/up-down-bar";
+import { voteHref, type VoteRow } from "@/components/votes/data";
+import { KindBadge, VoteTime } from "@/components/votes/votes-table";
+import { formatNumber, formatPercent } from "@/lib/format";
 import { SeeAllLink } from "./see-all-link";
-
-// What a vote was on: a caption opens its photo, a meme opens the meme.
-function voteHref(vote: UserVote) {
-  return vote.kind === "caption" ? `/media/${vote.post_id}` : `/memes/${vote.item_id}`;
-}
 
 // How generous a voter is: the share of all their votes that are 👍, with a
 // bar so a harsh critic stands out at a glance.
 function UpvoteShare({ upvotes, total }: { upvotes: number; total: number }) {
-  const share = total ? Math.round((upvotes / total) * 100) : 0;
+  const downvotes = total - upvotes;
   return (
     <div className="mb-4">
       <p className="flex flex-wrap items-baseline justify-between gap-2 text-sm tabular-nums">
@@ -22,15 +18,11 @@ function UpvoteShare({ upvotes, total }: { upvotes: number; total: number }) {
           <span className="text-zinc-500 dark:text-zinc-400">of their votes are 👍</span>
         </span>
         <span className="text-xs text-zinc-500 dark:text-zinc-400">
-          👍 {formatNumber(upvotes)} · 👎 {formatNumber(total - upvotes)}
+          👍 {formatNumber(upvotes)} · 👎 {formatNumber(downvotes)}
         </span>
       </p>
-      <div
-        role="img"
-        aria-label={`${share}% upvotes`}
-        className="mt-2 flex h-2 overflow-hidden rounded-full bg-red-200 dark:bg-red-950"
-      >
-        <div className="bg-emerald-500" style={{ width: `${share}%` }} />
+      <div className="mt-2">
+        <UpDownBar up={upvotes} down={downvotes} />
       </div>
     </div>
   );
@@ -45,7 +37,7 @@ export function UserVotes({
   error,
 }: {
   userId: string;
-  votes: UserVote[];
+  votes: VoteRow[];
   total: number;
   // null when the count query failed: the list still shows, the share doesn't.
   upvotes: number | null;
@@ -83,10 +75,8 @@ export function UserVotes({
                     {vote.kind === "caption" ? `“${vote.label}”` : vote.label}
                   </Link>
                   <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-                    <Badge>{vote.kind === "caption" ? "✨ AI caption" : "😂 Meme"}</Badge>
-                    <time dateTime={vote.created_at} title={formatDateTime(vote.created_at)}>
-                      {timeAgo(vote.created_at)}
-                    </time>
+                    <KindBadge kind={vote.kind} />
+                    <VoteTime vote={vote} />
                   </p>
                 </div>
               </li>

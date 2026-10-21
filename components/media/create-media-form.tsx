@@ -26,7 +26,7 @@ import { resizeImage } from "@/lib/resize-image";
 type Mode = "gemini" | "manual";
 
 const inputClass =
-  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900";
+  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900";
 
 function choiceClass(selected: boolean) {
   return `flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition has-focus-visible:ring-2 has-focus-visible:ring-blue-500/40 ${

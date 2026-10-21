@@ -12,14 +12,14 @@ import { addCaption, deleteCaption, updateCaption } from "@/app/(admin)/media/ac
 import { ActionMessage } from "@/components/action-message";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { Badge } from "@/components/ui";
+import { VoteTally } from "@/components/vote-tally";
 import { IDLE, type ActionState } from "@/lib/action-state";
 import { CAPTION_MAX_LENGTH, type Caption } from "@/lib/captions";
-import { scoreTone, signedScore } from "@/lib/format";
-import { plural, tidyText } from "./data";
-import { VoteTally } from "./vote-tally";
+import { plural, scoreTone, signedScore } from "@/lib/format";
+import { tidyText } from "./data";
 
 const textareaClass =
-  "w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base leading-snug outline-none [field-sizing:content] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900";
+  "w-full resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base leading-snug [field-sizing:content] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900";
 
 // Newlines are dropped when saving anyway, so Enter saves (Shift+Enter still
 // works for anyone who expects it to). requestSubmit() ignores a disabled
@@ -125,7 +125,7 @@ export function CaptionEditor({
             {canDelete ? (
               <form action={deleteAction}>
                 <ConfirmSubmit
-                  message={`Delete caption ${caption.position}${votes ? ` and its ${plural(votes, "vote", "votes")}` : ""}? This can't be undone.`}
+                  message={`Delete caption ${caption.position}${votes ? ` and its ${plural(votes, "vote")}` : ""}? This can't be undone.`}
                   pendingLabel="Deleting…"
                   className="px-3 py-1.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/50"
                 >

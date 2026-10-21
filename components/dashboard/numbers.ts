@@ -1,5 +1,5 @@
 import type { Dashboard } from "@/lib/dashboard";
-import { formatNumber } from "@/lib/format";
+import { formatNumber, signedScore } from "@/lib/format";
 
 // Number helpers for the dashboard. A new database has lots of zeros and
 // nulls, so every ratio here has an answer for "nothing to divide by".
@@ -21,6 +21,7 @@ export function fraction(part: number, whole: number) {
 
 // 0.723 -> "72%". null -> "–". A sliver that would round to "0%" says "<1%",
 // so it doesn't read as none at all.
+// Takes a ratio from share(), where lib/format's formatPercent takes part and whole.
 export function percent(value: number | null, digits = 0) {
   if (value === null) return "–";
   const smallest = 10 ** -digits;
@@ -28,17 +29,9 @@ export function percent(value: number | null, digits = 0) {
   return `${(value * 100).toFixed(digits)}%`;
 }
 
-// Scores and changes: "+12", "−3", "0". A real minus sign, so columns line up.
-export function signed(value: number, digits = 0) {
-  const rounded = Number(value.toFixed(digits));
-  if (rounded === 0) return "0";
-  const text = digits ? Math.abs(rounded).toFixed(digits) : formatNumber(Math.abs(rounded));
-  return `${rounded > 0 ? "+" : "−"}${text}`;
-}
-
 // Average caption score, which is null when there are no captions to average.
 export function averageScore(value: number | null) {
-  return value === null ? "–" : signed(value, 1);
+  return value === null ? "–" : signedScore(value, 1);
 }
 
 // One decimal for small numbers ("4.2"), none once it's big enough not to matter.
@@ -66,11 +59,6 @@ export function formatWait(minutes: number | null) {
   const hours = minutes / 60;
   if (hours < 48) return `${decimal(hours)} h`;
   return `${decimal(hours / 24)} days`;
-}
-
-// "1 meme", "3 memes".
-export function plural(n: number, word: string, many = `${word}s`) {
-  return `${formatNumber(n)} ${n === 1 ? word : many}`;
 }
 
 export function ordinal(n: number) {
@@ -120,11 +108,6 @@ export function dayLabel(day: string, style: "short" | "long" = "short") {
   const date = new Date(`${day}T12:00:00Z`);
   if (Number.isNaN(date.getTime())) return day;
   return (style === "long" ? longDay : shortDay).format(date);
-}
-
-// Profiles without a name still need something to click on.
-export function personName(name: string | null | undefined) {
-  return name?.trim() || "Unnamed user";
 }
 
 export function truncate(text: string, max: number) {

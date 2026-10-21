@@ -119,14 +119,16 @@ export async function createMedia(_prev: ActionState, formData: FormData): Promi
   let model = MANUAL_MODEL;
 
   if (mode === "manual") {
-    // Blank boxes are fine: the form always shows a few.
-    captions = formData.getAll("caption").map(oneLine).filter(Boolean);
-    if (captions.length === 0) return fail("Write at least one caption.");
-    if (captions.length > MAX_CAPTIONS) return fail(`A photo can have at most ${MAX_CAPTIONS} captions.`);
-    for (const [index, caption] of captions.entries()) {
-      const error = checkCaption(caption);
+    // Blank boxes are fine: the form always shows a few. Errors name the box
+    // as numbered on the form, so they're checked before blanks are dropped.
+    const boxes = formData.getAll("caption").map(oneLine);
+    for (const [index, caption] of boxes.entries()) {
+      const error = caption ? checkCaption(caption) : null;
       if (error) return fail(`Caption ${index + 1}: ${error}`);
     }
+    captions = boxes.filter(Boolean);
+    if (captions.length === 0) return fail("Write at least one caption.");
+    if (captions.length > MAX_CAPTIONS) return fail(`A photo can have at most ${MAX_CAPTIONS} captions.`);
   } else {
     try {
       const result = await generateCaptions({ image, mimeType: photo.type, vibe, location });
@@ -265,7 +267,9 @@ export async function deleteCaption(captionId: number): Promise<ActionState> {
   if (!data?.length) return fail("That caption was not found, or you're not allowed to delete it.");
 
   revalidateMedia(generationId, owner?.user_id);
-  return { status: "success", message: "Caption deleted." };
+  // The message can't live in the caption's own row, which is gone after the
+  // refresh, so the photo's page says it instead.
+  redirect(`/media/${generationId}?captionDeleted=1`);
 }
 
 // New captions start with no votes (the column defaults) and take the first

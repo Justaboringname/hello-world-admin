@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
 import type { Dashboard } from "@/lib/dashboard";
-import { formatNumber } from "@/lib/format";
-import { percent, personName, share } from "./numbers";
+import { displayName, formatNumber, plural } from "@/lib/format";
+import { percent, share } from "./numbers";
 import { NoData, Rank } from "./panel";
 
 type Person = { user_id: string; name: string | null; avatar_url: string | null };
@@ -21,12 +21,12 @@ function PersonRow({
   primary: React.ReactNode;
   secondary: React.ReactNode;
 }) {
-  const name = personName(person.name);
+  const name = displayName(person.name);
   return (
     <li>
       <Link href={`/users/${person.user_id}`} className={`flex items-center gap-3 p-2 ${hover}`}>
         <Rank value={rank} />
-        <Avatar src={person.avatar_url} name={name} />
+        <Avatar src={person.avatar_url} name={name} decorative />
         <span className="min-w-0 flex-1 truncate text-sm font-medium">{name}</span>
         <span className="shrink-0 text-right">
           <span className="block text-sm font-semibold tabular-nums">{primary}</span>
@@ -46,7 +46,7 @@ export function CreatorList({ creators }: { creators: Dashboard["top_creators"] 
           rank={index + 1}
           person={person}
           primary={`👍 ${formatNumber(person.upvotes)}`}
-          secondary={`${formatNumber(person.posts)} ${person.posts === 1 ? "post" : "posts"}`}
+          secondary={plural(person.posts, "post")}
         />
       ))}
     </ol>
@@ -61,8 +61,8 @@ export function VoterList({ voters }: { voters: Dashboard["top_voters"] }) {
           key={person.user_id}
           rank={index + 1}
           person={person}
-          primary={`${formatNumber(person.votes)} ${person.votes === 1 ? "vote" : "votes"}`}
-          secondary={`${percent(share(person.upvotes, person.votes))} 👍 · ${formatNumber(person.days)} ${person.days === 1 ? "day" : "days"}`}
+          primary={plural(person.votes, "vote")}
+          secondary={`${percent(share(person.upvotes, person.votes))} 👍 · ${plural(person.days, "day")}`}
         />
       ))}
     </ol>
@@ -146,8 +146,8 @@ function Award({
         {person ? (
           <>
             <span className="mt-0.5 flex items-center gap-2 text-sm font-semibold">
-              <Avatar src={person.avatar_url} name={personName(person.name)} />
-              <span className="truncate">{personName(person.name)}</span>
+              <Avatar src={person.avatar_url} name={displayName(person.name)} decorative />
+              <span className="truncate">{displayName(person.name)}</span>
             </span>
             <span className="mt-1 block text-xs text-zinc-500 dark:text-zinc-400">{detail}</span>
           </>

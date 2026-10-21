@@ -1,5 +1,4 @@
 import type { Caption } from "@/lib/captions";
-import { formatNumber } from "@/lib/format";
 
 // Row shapes and URL options for the /media pages. The Supabase client is
 // untyped, so these mirror the generations and captions tables and the
@@ -62,19 +61,12 @@ export function parseMediaSort(value: string | undefined): MediaSort {
   return value && Object.hasOwn(MEDIA_SORTS, value) ? (value as MediaSort) : DEFAULT_MEDIA_SORT;
 }
 
-
 // Captions and locations are saved as one tidy line. The caption editor
 // compares with the same rule, so "unsaved" means the server would save
 // something different.
 export function tidyText(text: string) {
   return text.replace(/\s+/g, " ").trim();
 }
-
-export function plural(count: number, one: string, many: string) {
-  return `${formatNumber(count)} ${count === 1 ? one : many}`;
-}
-
-
 
 export function photoAlt(photo: { location: string | null; author_name: string | null }) {
   const where = photo.location ? ` from ${photo.location}` : "";

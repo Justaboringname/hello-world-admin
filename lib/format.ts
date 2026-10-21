@@ -10,9 +10,18 @@ export function formatCompact(value: number) {
   return Math.abs(value) < 10_000 ? integer.format(value) : compact.format(value);
 }
 
-// +3, 0, -2: a score with its sign, like the main app's vote buttons.
-export function signedScore(score: number) {
-  return score > 0 ? `+${formatNumber(score)}` : formatNumber(score);
+// "1 caption", "3 captions".
+export function plural(count: number, one: string, many = `${one}s`) {
+  return `${formatNumber(count)} ${count === 1 ? one : many}`;
+}
+
+// +3, 0, −2: a score or change with its sign, like the main app's vote
+// buttons. A real minus sign (U+2212), so columns of numbers line up.
+export function signedScore(value: number, digits = 0) {
+  const rounded = Number(value.toFixed(digits));
+  if (rounded === 0) return "0";
+  const text = digits ? Math.abs(rounded).toFixed(digits) : formatNumber(Math.abs(rounded));
+  return `${rounded > 0 ? "+" : "−"}${text}`;
 }
 
 // The Badge tone for a score.
@@ -49,6 +58,16 @@ export function fullName(
   person: { first_name?: string | null; last_name?: string | null } | null | undefined,
 ) {
   return [person?.first_name, person?.last_name].filter(Boolean).join(" ");
+}
+
+// What to call someone on screen. Plenty of profiles have no name yet, and
+// the views hand over names already joined (voter_name, author_name), so it
+// takes either.
+export function displayName(
+  person: string | { first_name?: string | null; last_name?: string | null } | null | undefined,
+) {
+  const name = typeof person === "string" ? person.trim() : fullName(person);
+  return name || "Unnamed user";
 }
 
 // A search box value, tidied: one line, no control characters (a NUL would

@@ -1,16 +1,15 @@
 import Link from "next/link";
 import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/ui";
-import { fullName, formatNumber } from "@/lib/format";
+import { displayName, formatNumber, fullName } from "@/lib/format";
 import { avatarName, providerLabel, type AdminUser } from "./data";
 import { When, whenTitle } from "./when";
 
 function UserName({ user }: { user: AdminUser }) {
-  const name = fullName(user);
-  return name ? (
-    <span className="truncate font-medium">{name}</span>
-  ) : (
-    <span className="truncate italic text-zinc-500 dark:text-zinc-400">No name yet</span>
+  return (
+    <span className={`truncate ${fullName(user) ? "font-medium" : "italic text-zinc-500 dark:text-zinc-400"}`}>
+      {displayName(user)}
+    </span>
   );
 }
 
@@ -66,7 +65,7 @@ export function UserList({ users }: { users: AdminUser[] }) {
               className="block rounded-2xl border border-zinc-200 bg-surface p-4 shadow-sm transition hover:border-zinc-300 hover:shadow-md dark:border-zinc-800 dark:hover:border-zinc-700"
             >
               <div className="flex items-center gap-3">
-                <Avatar src={user.avatar_url} name={avatarName(user)} />
+                <Avatar src={user.avatar_url} name={avatarName(user)} decorative />
                 <div className="min-w-0 flex-1">
                   <p className="flex min-w-0 items-center gap-2">
                     <UserName user={user} />
@@ -77,7 +76,7 @@ export function UserList({ users }: { users: AdminUser[] }) {
               </div>
               <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
                 {providerLabel(user.provider)} · joined <When iso={user.created_at} show="date" /> ·
-                seen <When iso={user.last_sign_in_at} show="ago" never="never" />
+                last sign-in <When iso={user.last_sign_in_at} show="ago" never="never" />
               </p>
               <dl className="mt-3 grid grid-cols-4 gap-2 border-t border-zinc-100 pt-3 text-center dark:border-zinc-800">
                 {COUNTS.map(({ key, label }) => (
@@ -123,7 +122,7 @@ export function UserList({ users }: { users: AdminUser[] }) {
                 <tr key={user.id} className="group transition hover:bg-zinc-50 dark:hover:bg-white/[0.03]">
                   <td className="max-w-80 p-0">
                     <Link href={href} className="flex min-w-0 items-center gap-3 px-4 py-2.5">
-                      <Avatar src={user.avatar_url} name={avatarName(user)} />
+                      <Avatar src={user.avatar_url} name={avatarName(user)} decorative />
                       <span className="min-w-0">
                         <span className="flex min-w-0 items-center gap-2 group-hover:underline">
                           <UserName user={user} />

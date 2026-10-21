@@ -16,14 +16,15 @@ import { FlashBanner } from "@/components/flash-banner";
 import { MemeCard } from "@/components/memes/meme-card";
 import {
   EmptyState,
-  ErrorNote,
   FilterTabs,
+  LoadError,
   PageHeader,
   Pagination,
   SearchBox,
   hrefWith,
+  linkClass,
 } from "@/components/ui";
-import { UserChip } from "@/components/votes/user-chip";
+import { UserChip } from "@/components/user-chip";
 import { requireAdmin } from "@/lib/auth";
 import { cleanSearch, formatNumber, pageIndex, parseUuid } from "@/lib/format";
 import { firstParam } from "@/lib/redirect";
@@ -38,8 +39,6 @@ const PAGE_SIZE = 24;
 // Each word must match somewhere, so "drake guest" finds the Drake meme
 // about browsing as a guest. Capped so one search can't grow a huge URL.
 const MAX_SEARCH_WORDS = 5;
-
-const linkClass = "font-medium text-blue-600 hover:underline dark:text-blue-400";
 
 export default async function MemesPage({ searchParams }: PageProps<"/memes">) {
   await requireAdmin("/memes");
@@ -122,7 +121,7 @@ export default async function MemesPage({ searchParams }: PageProps<"/memes">) {
         <SearchBox
           action="/memes"
           defaultValue={q}
-          placeholder="Search titles, meme text, authors"
+          placeholder="Search memes and authors"
           hidden={{ show: linkParams.show, sort: linkParams.sort, user: linkParams.user }}
         />
         <FilterTabs label="Which memes" items={showTabs} />
@@ -139,7 +138,7 @@ export default async function MemesPage({ searchParams }: PageProps<"/memes">) {
       </div>
 
       {error ? (
-        <ErrorNote>Couldn&apos;t load memes: {error.message}</ErrorNote>
+        <LoadError what="memes" error={error} />
       ) : pastEnd ? (
         <EmptyState>
           There&apos;s nothing on page {page + 1}.{" "}

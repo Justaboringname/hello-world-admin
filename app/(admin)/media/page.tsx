@@ -13,13 +13,15 @@ import { FlashBanner } from "@/components/flash-banner";
 import { MediaCard } from "@/components/media/media-card";
 import {
   EmptyState,
-  ErrorNote,
   FilterTabs,
+  LoadError,
   PageHeader,
   Pagination,
   SearchBox,
   hrefWith,
+  linkClass,
 } from "@/components/ui";
+import { UserChip } from "@/components/user-chip";
 import { requireAdmin } from "@/lib/auth";
 import { VIBES, isVibe, vibeLabel, type Vibe } from "@/lib/captions";
 import { cleanSearch, formatNumber, pageIndex, parseUuid } from "@/lib/format";
@@ -35,8 +37,6 @@ const PAGE_SIZE = 24;
 // Each word must match somewhere, so "times square rat" finds a rat caption
 // posted from Times Square. Capped so one search can't grow a huge URL.
 const MAX_SEARCH_WORDS = 5;
-
-const linkClass = "font-medium text-blue-600 hover:underline dark:text-blue-400";
 
 export default async function MediaPage({ searchParams }: PageProps<"/media">) {
   await requireAdmin("/media");
@@ -133,36 +133,24 @@ export default async function MediaPage({ searchParams }: PageProps<"/media">) {
         <SearchBox
           action="/media"
           defaultValue={q}
-          placeholder="Search captions, places, authors, models"
+          placeholder="Search captions, places, authors"
           hidden={{ vibe: linkParams.vibe, sort: linkParams.sort, user: linkParams.user }}
         />
         <FilterTabs label="Filter by vibe" items={vibeTabs} />
         <FilterTabs label="Sort photos" items={sortTabs} />
         {userId && (
-          <p className="flex flex-wrap items-center gap-2 text-sm">
-            <span className="text-zinc-500 dark:text-zinc-400">Posted by</span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 py-1 pl-3 pr-1 font-medium text-blue-800 dark:bg-blue-950 dark:text-blue-200">
-              <Link href={`/users/${userId}`} className="hover:underline">
-                {userName}
-              </Link>
-              <Link
-                href={hrefWith("/media", { ...linkParams, user: undefined })}
-                aria-label={`Show photos by everyone, not just ${userName}`}
-                title="Remove this filter"
-                className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-blue-200 dark:hover:bg-blue-900"
-              >
-                ✕
-              </Link>
-            </span>
-          </p>
+          <UserChip
+            prefix="Posted by"
+            userId={userId}
+            name={userName}
+            clearHref={hrefWith("/media", { ...linkParams, user: undefined })}
+            clearLabel={`Show photos by everyone, not just ${userName}`}
+          />
         )}
       </div>
 
       {error ? (
-        <ErrorNote>
-          Couldn&apos;t load photos: {error.message}
-          {error.code === "PGRST205" && " Has admin/supabase/admin.sql been run in the SQL Editor?"}
-        </ErrorNote>
+        <LoadError what="photos" error={error} />
       ) : pastEnd ? (
         <EmptyState>
           There&apos;s nothing on page {page + 1}.{" "}

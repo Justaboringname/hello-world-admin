@@ -130,7 +130,3 @@ export function voteHref(vote: Pick<VoteRow, "kind" | "item_id" | "post_id">) {
 export function wasChanged(vote: Pick<VoteRow, "created_at" | "updated_at">) {
   return Date.parse(vote.updated_at) - Date.parse(vote.created_at) > 60_000;
 }
-
-export function voterName(vote: Pick<VoteRow, "voter_name">) {
-  return vote.voter_name ?? "Unnamed user";
-}

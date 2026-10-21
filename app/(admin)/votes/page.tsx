@@ -2,14 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   EmptyState,
-  ErrorNote,
   FilterTabs,
+  LoadError,
   PageHeader,
   Pagination,
   SearchBox,
   hrefWith,
+  linkClass,
 } from "@/components/ui";
 import { oneOf } from "@/components/memes/data";
+import { UserChip } from "@/components/user-chip";
 import {
   CAPTION_RATING_COLUMNS,
   DEFAULT_RATING_SORT,
@@ -32,7 +34,6 @@ import {
 } from "@/components/votes/data";
 import { RatingsList, captionItem, memeItem } from "@/components/votes/ratings-list";
 import { SummaryTiles, type VoteSummary } from "@/components/votes/summary-tiles";
-import { UserChip } from "@/components/votes/user-chip";
 import { VotesTable } from "@/components/votes/votes-table";
 import { requireAdmin } from "@/lib/auth";
 import { cleanSearch, formatNumber, pageIndex, parseUuid } from "@/lib/format";
@@ -45,8 +46,6 @@ export const metadata: Metadata = { title: "Votes" };
 
 const VOTES_PAGE_SIZE = 50;
 const RATINGS_PAGE_SIZE = 25;
-
-const linkClass = "font-medium text-blue-600 hover:underline dark:text-blue-400";
 
 type Supabase = Awaited<ReturnType<typeof createClient>>;
 type QueryError = { code?: string; message: string } | null;
@@ -78,15 +77,6 @@ async function loadSummary(supabase: Supabase): Promise<VoteSummary> {
 // Its own component so React loads it alongside the tab's rows.
 async function Summary({ supabase }: { supabase: Supabase }) {
   return <SummaryTiles summary={await loadSummary(supabase)} />;
-}
-
-function LoadError({ what, error }: { what: string; error: NonNullable<QueryError> }) {
-  return (
-    <ErrorNote>
-      Couldn&apos;t load {what}: {error.message || "the database didn't answer."}
-      {error.code === "PGRST205" && " Has admin/supabase/admin.sql been run in the SQL Editor?"}
-    </ErrorNote>
-  );
 }
 
 function PastEnd({ page, firstPageHref }: { page: number; firstPageHref: string }) {
@@ -258,7 +248,7 @@ async function AllVotes({ supabase, kind, vote, userId, q, page }: TabProps) {
         <SearchBox
           action="/votes"
           defaultValue={q}
-          placeholder="Search caption text and meme titles"
+          placeholder="Search captions and memes"
           hidden={{ kind: linkParams.kind, vote: linkParams.vote, user: linkParams.user }}
         />
         <div className="flex flex-wrap gap-x-4 gap-y-3">

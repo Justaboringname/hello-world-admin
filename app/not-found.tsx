@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 
-// A URL that matches no admin route. proxy.ts has already checked the
-// visitor, so this only ever renders for superadmins.
+// A URL that matches no admin route. proxy.ts sends everyone else to sign in
+// first, so in practice only superadmins see it; it shows no data anyway.
 export default function NotFound() {
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-12 font-sans">

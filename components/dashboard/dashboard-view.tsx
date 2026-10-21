@@ -1,6 +1,6 @@
 import { vibeLabel } from "@/lib/captions";
 import type { Dashboard } from "@/lib/dashboard";
-import { formatDateTime, formatNumber } from "@/lib/format";
+import { displayName, formatDateTime, formatNumber, plural, signedScore } from "@/lib/format";
 import { ActivityChart } from "./activity-chart";
 import { AiVsHumans, compareKinds } from "./ai-vs-humans";
 import { SERIES, SIGNUPS_TRACK } from "./colors";
@@ -17,10 +17,7 @@ import {
   hourName,
   normalizeDashboard,
   percent,
-  personName,
-  plural,
   share,
-  signed,
   truncate,
   weekChange,
 } from "./numbers";
@@ -100,10 +97,10 @@ function creatorHeadline(creators: Dashboard["top_creators"]) {
   const [top] = creators;
   if (!top) return "Nobody has posted yet";
   if (top.upvotes <= 0) return "No 👍 on anyone's posts yet";
-  const tied = tiedLeaders(creators, (c) => c.upvotes, (c) => personName(c.name), "people");
+  const tied = tiedLeaders(creators, (c) => c.upvotes, (c) => displayName(c.name), "people");
   return tied
     ? `${tied} share the most 👍 (${formatNumber(top.upvotes)} each)`
-    : `${personName(top.name)} has earned the most 👍 (${formatNumber(top.upvotes)})`;
+    : `${displayName(top.name)} has earned the most 👍 (${formatNumber(top.upvotes)})`;
 }
 
 function locationHeadline(locations: Dashboard["locations"]) {
@@ -116,10 +113,10 @@ function locationHeadline(locations: Dashboard["locations"]) {
 function awardsHeadline(awards: Dashboard["awards"]) {
   const { harshest_critic: critic, biggest_fan: fan, night_owl: owl } = awards;
   if (critic) {
-    return `${personName(critic.name)} is the toughest crowd (${percent(share(critic.upvotes, critic.votes))} 👍)`;
+    return `${displayName(critic.name)} is the toughest crowd (${percent(share(critic.upvotes, critic.votes))} 👍)`;
   }
-  if (fan) return `${personName(fan.name)} is the biggest fan (${percent(share(fan.upvotes, fan.votes))} 👍)`;
-  if (owl) return `${personName(owl.name)} votes the latest`;
+  if (fan) return `${displayName(fan.name)} is the biggest fan (${percent(share(fan.upvotes, fan.votes))} 👍)`;
+  if (owl) return `${displayName(owl.name)} votes the latest`;
   return "No awards to hand out yet";
 }
 
@@ -163,7 +160,7 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
             color: SERIES.signups,
             noun: "sign-ups",
           }}
-          facts={`${formatNumber(totals.admins)} ${totals.admins === 1 ? "admin" : "admins"} · ${percent(share(funnel.named, funnel.signed_up))} added their name`}
+          facts={`${plural(totals.admins, "admin")} · ${percent(share(funnel.named, funnel.signed_up))} added their name`}
         />
         <StatTile
           icon="🖼️"
@@ -191,7 +188,7 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
             color: SERIES.votes,
             noun: "votes",
           }}
-          facts={`${percent(share(totals.upvotes, totals.votes))} 👍 · ${formatNumber(totals.voters)} ${totals.voters === 1 ? "voter" : "voters"}`}
+          facts={`${percent(share(totals.upvotes, totals.votes))} 👍 · ${plural(totals.voters, "voter")}`}
         />
         <StatTile
           icon="🔥"
@@ -207,7 +204,7 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
             track: SIGNUPS_TRACK,
             label: `${percent(share(now.active_users, totals.users))} of all ${formatNumber(totals.users)} users`,
           }}
-          facts={`${formatNumber(funnel.regulars)} ${funnel.regulars === 1 ? "regular" : "regulars"} (voted on 3+ days)`}
+          facts={`${plural(funnel.regulars, "regular")} (voted on 3+ days)`}
         />
       </div>
 
@@ -270,7 +267,7 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
             !bestVibe
               ? "No votes on any vibe yet"
               : bestVibe.votes < FEW_VOTES
-                ? `${vibeLabel(bestVibe.vibe)} leads, on just ${formatNumber(bestVibe.votes)} ${bestVibe.votes === 1 ? "vote" : "votes"}`
+                ? `${vibeLabel(bestVibe.vibe)} leads, on just ${plural(bestVibe.votes, "vote")}`
                 : `${vibeLabel(bestVibe.vibe)} gets the most laughs`
           }
           description={`Each voice's captions, ranked by the share of votes that are 👍. Vibes with under ${FEW_VOTES} votes rank after the rest.`}
@@ -307,7 +304,7 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
         <Panel
           id="top-captions"
           topic="Hall of fame: captions"
-          title={topCaption ? `Gemini's best line scored ${signed(topCaption.score)}` : "No caption votes yet"}
+          title={topCaption ? `Gemini's best line scored ${signedScore(topCaption.score)}` : "No caption votes yet"}
           description="The highest scores (👍 minus 👎). Open one to see its photo."
         >
           {d.top_captions.length ? (
@@ -361,7 +358,7 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
           topic="Top voters"
           title={
             topVoter
-              ? `${personName(topVoter.name)} has voted the most (${plural(topVoter.votes, "time")})`
+              ? `${displayName(topVoter.name)} has voted the most (${plural(topVoter.votes, "time")})`
               : "Nobody has voted yet"
           }
           description="Votes cast, how many were 👍, and on how many days."

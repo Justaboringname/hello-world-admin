@@ -1,17 +1,19 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui";
-import { formatDateTime, formatNumber, scoreTone, signedScore } from "@/lib/format";
+import { VoteTally } from "@/components/vote-tally";
+import { formatDateTime, scoreTone, signedScore } from "@/lib/format";
 import { memeImageUrl } from "@/lib/storage";
 import { timeAgo } from "@/lib/time";
 import { memeAlt, memeAuthor, type MemeRow } from "./data";
 import { MemeImage } from "./meme-image";
+import { MembersOnlyBadge } from "./members-only-badge";
 
 // One meme in the /memes grid. The whole card opens its admin page.
 export function MemeCard({ meme }: { meme: MemeRow }) {
   return (
     <Link
       href={`/memes/${meme.id}`}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-surface shadow-sm transition hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:border-zinc-800"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-surface shadow-sm transition hover:shadow-md dark:border-zinc-800"
     >
       <MemeImage
         src={memeImageUrl(meme)}
@@ -30,19 +32,11 @@ export function MemeCard({ meme }: { meme: MemeRow }) {
           ) : (
             <Badge tone="amber">🖼️ Classic</Badge>
           )}
-          {meme.members_only && <Badge tone="blue">🔓 Members only</Badge>}
+          {meme.members_only && <MembersOnlyBadge />}
         </span>
 
         <span className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
-          {/* aria-label is ignored on a plain span, so the words are sr-only text. */}
-          <span>
-            <span aria-hidden>👍</span> {formatNumber(meme.upvotes)}
-            <span className="sr-only"> upvotes</span>
-          </span>
-          <span>
-            <span aria-hidden>👎</span> {formatNumber(meme.downvotes)}
-            <span className="sr-only"> downvotes</span>
-          </span>
+          <VoteTally upvotes={meme.upvotes} downvotes={meme.downvotes} />
           <Badge tone={scoreTone(meme.score)}>Score {signedScore(meme.score)}</Badge>
           <time dateTime={meme.created_at} title={formatDateTime(meme.created_at)}>
             {timeAgo(meme.created_at)}

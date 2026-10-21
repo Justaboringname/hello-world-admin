@@ -3,7 +3,7 @@ import { useId } from "react";
 // The app mark: a smiling speech bubble (a caption that made you laugh).
 // Same drawing as app/icon.svg.
 export function Logo({ className = "h-7 w-7" }: { className?: string }) {
-  // The header and footer both draw it, so each needs its own gradient id.
+  // Drawn on several pages at once, so each needs its own gradient id.
   const gradientId = useId();
   return (
     <svg aria-hidden viewBox="0 0 32 32" className={className}>

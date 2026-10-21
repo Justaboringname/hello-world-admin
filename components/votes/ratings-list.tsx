@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { memeAlt, memeAuthor } from "@/components/memes/data";
+import { MembersOnlyBadge } from "@/components/memes/members-only-badge";
 import { Badge } from "@/components/ui";
+import { UpDownBar } from "@/components/up-down-bar";
 import { vibeLabel } from "@/lib/captions";
 import { formatNumber, scoreTone, signedScore } from "@/lib/format";
 import { memeImageUrl, photoUrl } from "@/lib/storage";
 import type { CaptionRating, MemeRating } from "./data";
-import { RatingBar } from "./rating-bar";
 
 // Captions and memes ranked the same way, so one list renders both.
 type RatingItem = {
@@ -50,7 +51,7 @@ export function memeItem(meme: MemeRating): RatingItem {
     meta: (
       <>
         {meme.user_id ? <span>by {memeAuthor(meme)}</span> : <Badge tone="amber">🖼️ Classic</Badge>}
-        {meme.members_only && <Badge tone="blue">🔓 Members only</Badge>}
+        {meme.members_only && <MembersOnlyBadge />}
       </>
     ),
     upvotes: meme.upvotes,
@@ -97,7 +98,7 @@ export function RatingsList({ items, offset }: { items: RatingItem[]; offset: nu
 
             <div className="flex items-center gap-3 pl-12 sm:w-80 sm:shrink-0 sm:pl-0">
               <div className="min-w-0 flex-1">
-                <RatingBar up={item.upvotes} down={item.downvotes} />
+                <UpDownBar up={item.upvotes} down={item.downvotes} showCounts />
               </div>
               <span className="w-14 shrink-0 text-right tabular-nums">
                 <Badge tone={scoreTone(item.score)}>{signedScore(item.score)}</Badge>

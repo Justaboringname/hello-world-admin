@@ -3,13 +3,23 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FlashBanner } from "@/components/flash-banner";
 import { AddCaptionForm, CaptionEditor } from "@/components/media/caption-editor";
-import { MEDIA_DETAIL_COLUMNS, photoAlt, plural, topCaptionId, type MediaDetail } from "@/components/media/data";
+import { MEDIA_DETAIL_COLUMNS, photoAlt, topCaptionId, type MediaDetail } from "@/components/media/data";
 import { DeleteGenerationForm } from "@/components/media/delete-generation-form";
 import { GenerationDetailsForm } from "@/components/media/generation-details-form";
-import { Card, ErrorNote, PageHeader, hrefWith } from "@/components/ui";
+import {
+  BackLink,
+  Card,
+  DangerZone,
+  Detail,
+  LoadError,
+  PageHeader,
+  ViewInAppLink,
+  hrefWith,
+  linkClass,
+} from "@/components/ui";
 import { requireAdmin } from "@/lib/auth";
 import { MANUAL_MODEL, MAX_CAPTIONS, vibeLabel } from "@/lib/captions";
-import { formatDateTime, formatNumber, parseId, signedScore } from "@/lib/format";
+import { displayName, formatDateTime, formatNumber, parseId, plural, signedScore } from "@/lib/format";
 import { mainAppUrl } from "@/lib/links";
 import { firstParam } from "@/lib/redirect";
 import { photoUrl } from "@/lib/storage";
@@ -17,25 +27,6 @@ import { createClient } from "@/lib/supabase/server";
 import { timeAgo } from "@/lib/time";
 
 export const metadata: Metadata = { title: "AI photo" };
-
-const linkClass = "font-medium text-blue-600 hover:underline dark:text-blue-400";
-
-function BackLink() {
-  return (
-    <Link href="/media" className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
-      ← All AI media
-    </Link>
-  );
-}
-
-function Detail({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-0.5 py-2.5 sm:flex-row sm:gap-4">
-      <dt className="shrink-0 text-sm text-zinc-500 dark:text-zinc-400 sm:w-24">{label}</dt>
-      <dd className="min-w-0 break-words text-sm">{children}</dd>
-    </div>
-  );
-}
 
 function Prompt({ label, text, empty }: { label: string; text: string; empty: string }) {
   return (
@@ -53,10 +44,13 @@ function Prompt({ label, text, empty }: { label: string; text: string; empty: st
 }
 
 export default async function MediaDetailPage({ params, searchParams }: PageProps<"/media/[id]">) {
-  await requireAdmin(`/media/${encodeURIComponent((await params).id)}`);
-  const id = parseId((await params).id);
+  const { id: idParam } = await params;
+  await requireAdmin(`/media/${encodeURIComponent(idParam)}`);
+  const id = parseId(idParam);
   if (!id) notFound();
-  const created = firstParam((await searchParams).created) === "1";
+  const query = await searchParams;
+  const created = firstParam(query.created) === "1";
+  const captionDeleted = firstParam(query.captionDeleted) === "1";
 
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -68,8 +62,8 @@ export default async function MediaDetailPage({ params, searchParams }: PageProp
   if (error) {
     return (
       <div className="space-y-4">
-        <BackLink />
-        <ErrorNote>Couldn&apos;t load this photo: {error.message}</ErrorNote>
+        <BackLink href="/media">All AI media</BackLink>
+        <LoadError what="this photo" error={error} />
       </div>
     );
   }
@@ -85,17 +79,13 @@ export default async function MediaDetailPage({ params, searchParams }: PageProp
   const nextPosition = Array.from({ length: MAX_CAPTIONS }, (_, i) => i + 1).find((p) => !taken.has(p));
   const appUrl = mainAppUrl(`/p/${id}`);
   const src = photoUrl(generation.image_path);
-  const author = generation.author_name ?? "Unnamed user";
+  const author = displayName(generation.author_name);
 
-  const appLink = appUrl && (
-    <a href={appUrl} target="_blank" rel="noreferrer" className={linkClass}>
-      View in app ↗
-    </a>
-  );
+  const appLink = appUrl && <ViewInAppLink href={appUrl} />;
 
   return (
     <div className="space-y-6">
-      <BackLink />
+      <BackLink href="/media">All AI media</BackLink>
 
       {created && (
         <FlashBanner param="created" title="🎉 Photo created">
@@ -103,6 +93,7 @@ export default async function MediaDetailPage({ params, searchParams }: PageProp
           the main app{appLink ? <>: {appLink}</> : "."}
         </FlashBanner>
       )}
+      {captionDeleted && <FlashBanner param="captionDeleted" title="🗑️ Caption deleted, with its votes" />}
 
       <PageHeader
         title={`Photo #${id}`}
@@ -146,7 +137,7 @@ export default async function MediaDetailPage({ params, searchParams }: PageProp
 
           <Card
             title="Captions"
-            description={`${plural(captions.length, "caption", "captions")} of ${MAX_CAPTIONS} at most. Edit the wording here; votes only change when people vote.`}
+            description={`${plural(captions.length, "caption")} of ${MAX_CAPTIONS} at most. Edit the wording here; votes only change when people vote.`}
           >
             {captions.length ? (
               <ul className="-my-4 divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -229,7 +220,7 @@ export default async function MediaDetailPage({ params, searchParams }: PageProp
               </Detail>
               <Detail label="Votes">
                 <span className="tabular-nums">
-                  {plural(upvotes + downvotes, "vote", "votes")} on {plural(captions.length, "caption", "captions")}
+                  {plural(upvotes + downvotes, "vote")} on {plural(captions.length, "caption")}
                 </span>
               </Detail>
             </dl>
@@ -243,23 +234,15 @@ export default async function MediaDetailPage({ params, searchParams }: PageProp
             />
           </Card>
 
-          <section
-            aria-labelledby="danger-zone"
-            className="rounded-2xl border border-red-200 bg-surface p-5 shadow-sm dark:border-red-900/60"
+          <DangerZone
+            description={`Deletes the photo for everyone, with its ${plural(captions.length, "caption")} and ${plural(upvotes + downvotes, "vote")}. Its image file is removed from Storage too, unless a meme uses it.`}
           >
-            <h2 id="danger-zone" className="font-semibold text-red-700 dark:text-red-400">
-              Danger zone
-            </h2>
-            <p className="mb-4 mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-              Deletes the photo for everyone, with its {plural(captions.length, "caption", "captions")} and{" "}
-              {plural(upvotes + downvotes, "vote", "votes")}. The file is removed from Storage too.
-            </p>
             <DeleteGenerationForm
               generationId={id}
               captionCount={captions.length}
               voteCount={upvotes + downvotes}
             />
-          </section>
+          </DangerZone>
         </aside>
       </div>
     </div>

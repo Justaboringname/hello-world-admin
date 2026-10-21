@@ -1,5 +1,5 @@
+import { UpDownBar } from "@/components/up-down-bar";
 import { formatCompact, formatNumber, formatPercent } from "@/lib/format";
-import { RatingBar } from "./rating-bar";
 
 // null means that count's query failed; the other tiles still show.
 export type VoteSummary = {
@@ -74,7 +74,7 @@ export function SummaryTiles({ summary }: { summary: VoteSummary }) {
       <Tile label="Upvote share" value={total === null ? null : formatPercent(up ?? 0, total)} hint="👍 out of all votes">
         {total !== null && (
           <div className="mt-2">
-            <RatingBar up={up ?? 0} down={down ?? 0} showCounts={false} />
+            <UpDownBar up={up ?? 0} down={down ?? 0} />
           </div>
         )}
       </Tile>

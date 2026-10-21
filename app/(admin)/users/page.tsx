@@ -10,15 +10,16 @@ import {
 import { UserList } from "@/components/users/user-list";
 import {
   EmptyState,
-  ErrorNote,
   FilterTabs,
+  LoadError,
   PageHeader,
   Pagination,
   SearchBox,
   hrefWith,
+  linkClass,
 } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth";
-import { cleanSearch, formatNumber, pageIndex } from "@/lib/format";
+import { cleanSearch, formatNumber, pageIndex, plural } from "@/lib/format";
 import { firstParam } from "@/lib/redirect";
 import { searchOr } from "@/lib/search";
 import { createClient } from "@/lib/supabase/server";
@@ -29,10 +30,6 @@ const PAGE_SIZE = 25;
 const SEARCH_COLUMNS = ["email", "first_name", "last_name"] as const;
 // Enough for "first last email" without letting one search grow a huge URL.
 const MAX_SEARCH_WORDS = 5;
-
-function plural(count: number, one: string, many: string) {
-  return `${formatNumber(count)} ${count === 1 ? one : many}`;
-}
 
 export default async function UsersPage({ searchParams }: PageProps<"/users">) {
   await requireAdmin("/users");
@@ -100,14 +97,11 @@ export default async function UsersPage({ searchParams }: PageProps<"/users">) {
       </div>
 
       {error ? (
-        <ErrorNote>
-          Couldn&apos;t load users: {error.message}
-          {error.code === "PGRST202" && " Has admin/supabase/admin.sql been run in the SQL Editor?"}
-        </ErrorNote>
+        <LoadError what="users" error={error} />
       ) : pastEnd ? (
         <EmptyState>
           There&apos;s nothing on page {page + 1}.{" "}
-          <Link href={hrefWith("/users", linkParams)} className="font-medium text-blue-600 hover:underline dark:text-blue-400">
+          <Link href={hrefWith("/users", linkParams)} className={linkClass}>
             Go to the first page
           </Link>
         </EmptyState>
@@ -120,10 +114,10 @@ export default async function UsersPage({ searchParams }: PageProps<"/users">) {
                   <span className="font-medium text-zinc-900 dark:text-zinc-100">
                     {formatNumber(matched)}
                   </span>{" "}
-                  {total !== null ? `of ${plural(total, "user", "users")}` : matched === 1 ? "user" : "users"}{" "}
+                  {total !== null ? `of ${plural(total, "user")}` : matched === 1 ? "user" : "users"}{" "}
                   {matched === 1 ? "matches" : "match"} “{q}”
                 </span>
-                <Link href={hrefWith("/users", { sort: linkParams.sort })} className="text-blue-600 hover:underline dark:text-blue-400">
+                <Link href={hrefWith("/users", { sort: linkParams.sort })} className={linkClass}>
                   Clear search
                 </Link>
               </>

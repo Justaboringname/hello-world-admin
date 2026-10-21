@@ -17,7 +17,7 @@ export type MemeFields = {
 };
 
 const inputClass =
-  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base font-normal outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900";
+  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base font-normal focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900";
 
 // The server saves each field as one line, so compare the same way.
 function tidy(text: string) {
@@ -30,7 +30,7 @@ function Counter({ length, max }: { length: number; max: number }) {
   return (
     <span
       aria-hidden
-      className={`text-xs font-normal tabular-nums ${length > max ? "text-red-600 dark:text-red-400" : "text-zinc-500"}`}
+      className={`text-xs font-normal tabular-nums ${length > max ? "text-red-600 dark:text-red-400" : "text-zinc-500 dark:text-zinc-400"}`}
     >
       {length}/{max}
     </span>

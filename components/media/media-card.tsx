@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui";
+import { VoteTally } from "@/components/vote-tally";
 import { MANUAL_MODEL, vibeLabel } from "@/lib/captions";
-import { formatNumber, scoreTone, signedScore } from "@/lib/format";
+import { displayName, formatNumber, plural, scoreTone, signedScore } from "@/lib/format";
 import { photoUrl } from "@/lib/storage";
 import { timeAgo } from "@/lib/time";
-import { photoAlt, plural, type MediaRow } from "./data";
-import { VoteTally } from "./vote-tally";
+import { photoAlt, type MediaRow } from "./data";
 
 // One photo in the /media grid. The whole card opens its admin page.
 export function MediaCard({ photo }: { photo: MediaRow }) {
@@ -14,7 +14,7 @@ export function MediaCard({ photo }: { photo: MediaRow }) {
   return (
     <Link
       href={`/media/${photo.id}`}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-surface shadow-sm transition hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:border-zinc-800"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-surface shadow-sm transition hover:shadow-md dark:border-zinc-800"
     >
       <span className="relative block aspect-[4/3] overflow-hidden bg-zinc-900">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -51,11 +51,11 @@ export function MediaCard({ photo }: { photo: MediaRow }) {
         <span className="mt-auto flex flex-col gap-1 text-xs text-zinc-500 dark:text-zinc-400">
           <span className="truncate">
             {photo.location && <>📍 {photo.location} · </>}
-            {photo.author_name ? `by ${photo.author_name}` : "by an unnamed user"} ·{" "}
+            by {displayName(photo.author_name)} ·{" "}
             {timeAgo(photo.created_at)}
           </span>
           <span className="flex flex-wrap items-center gap-x-3 gap-y-1 tabular-nums">
-            <span>{plural(photo.caption_count, "caption", "captions")}</span>
+            <span>{plural(photo.caption_count, "caption")}</span>
             <VoteTally upvotes={photo.upvotes} downvotes={photo.downvotes} />
             <Badge tone={scoreTone(photo.score)}>Score {signedScore(photo.score)}</Badge>
           </span>

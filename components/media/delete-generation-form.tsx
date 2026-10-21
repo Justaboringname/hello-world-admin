@@ -5,7 +5,7 @@ import { deleteGeneration } from "@/app/(admin)/media/actions";
 import { ActionMessage } from "@/components/action-message";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { IDLE } from "@/lib/action-state";
-import { plural } from "./data";
+import { plural } from "@/lib/format";
 
 // On success the action redirects to /media, so only errors come back here.
 export function DeleteGenerationForm({
@@ -18,8 +18,8 @@ export function DeleteGenerationForm({
   voteCount: number;
 }) {
   const [state, formAction] = useActionState(deleteGeneration.bind(null, generationId), IDLE);
-  const captions = plural(captionCount, "caption", "captions");
-  const votes = plural(voteCount, "vote", "votes");
+  const captions = plural(captionCount, "caption");
+  const votes = plural(voteCount, "vote");
 
   return (
     <form action={formAction} className="flex flex-col items-start gap-2">

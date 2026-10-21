@@ -1,4 +1,5 @@
 import type { Meme } from "@/lib/captions";
+import { displayName } from "@/lib/format";
 
 // Row shapes and URL options for the /memes pages. The Supabase client is
 // untyped, so these mirror the memes table (main app's supabase/meme_votes.sql).
@@ -44,8 +45,6 @@ export function oneOf<K extends string>(
   return value !== undefined && Object.hasOwn(options, value) ? (value as K) : fallback;
 }
 
-
-
 // The top and bottom text are real text laid over the image, so screen
 // readers get them anyway; the alt only has to say what the picture is.
 export function memeAlt(meme: Pick<Meme, "title">) {
@@ -55,5 +54,5 @@ export function memeAlt(meme: Pick<Meme, "title">) {
 // Classics came with the app; everything else has a poster.
 export function memeAuthor(meme: Pick<MemeRow, "user_id" | "author_name">) {
   if (!meme.user_id) return "Classic";
-  return meme.author_name ?? "Unnamed user";
+  return displayName(meme.author_name);
 }

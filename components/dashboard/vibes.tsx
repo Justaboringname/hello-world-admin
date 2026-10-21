@@ -1,10 +1,10 @@
+import { UpDownBar } from "@/components/up-down-bar";
 import { VIBES, isVibe, vibeLabel } from "@/lib/captions";
 import type { Dashboard } from "@/lib/dashboard";
-import { formatNumber } from "@/lib/format";
+import { plural } from "@/lib/format";
 import { DOWN, UP } from "./colors";
 import { FEW_VOTES, averageScore, percent, share } from "./numbers";
 import { Legend, Rank } from "./panel";
-import { UpDownBar } from "./up-down-bar";
 
 // Vibes with enough votes to trust come first, then thin ones, then none.
 function tier(votes: number) {
@@ -74,8 +74,7 @@ export function VibeBoard({ rows }: { rows: ReturnType<typeof rankVibes> }) {
                 <UpDownBar up={row.up} down={row.down} />
               </div>
               <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                {formatNumber(row.photos)} {row.photos === 1 ? "photo" : "photos"} ·{" "}
-                {formatNumber(row.votes)} {row.votes === 1 ? "vote" : "votes"}
+                {plural(row.photos, "photo")} · {plural(row.votes, "vote")}
                 {row.avg !== null && <> · avg {averageScore(row.avg)} per caption</>}
                 {row.votes > 0 && row.votes < FEW_VOTES && <> · few votes, so take it lightly</>}
               </p>

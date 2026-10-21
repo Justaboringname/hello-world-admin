@@ -15,7 +15,9 @@ export async function GET(request: NextRequest) {
 
   // The login page shows a fixed message; the reason goes to the server log.
   const fail = (message: string) => {
-    console.error(`Admin sign-in failed: ${message}`);
+    // JSON-quoted: error_description comes from the URL, so it mustn't be able
+    // to fake extra log lines.
+    console.error(`Admin sign-in failed: ${JSON.stringify(message)}`);
     return NextResponse.redirect(new URL("/login?error=1", request.url));
   };
 

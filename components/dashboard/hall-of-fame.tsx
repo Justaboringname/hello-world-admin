@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { MembersOnlyBadge } from "@/components/memes/members-only-badge";
+import { UpDownBar } from "@/components/up-down-bar";
+import { VoteTally } from "@/components/vote-tally";
 import { vibeLabel } from "@/lib/captions";
 import type { Dashboard, RankedCaption } from "@/lib/dashboard";
-import { formatNumber } from "@/lib/format";
+import { displayName, signedScore } from "@/lib/format";
 import { memeImageUrl, photoUrl } from "@/lib/storage";
-import { ordinal, signed } from "./numbers";
-import { UpDownBar } from "./up-down-bar";
+import { ordinal } from "./numbers";
 
 const rowClass =
   "flex items-start gap-3 rounded-xl p-2 transition hover:bg-zinc-50 focus-visible:bg-zinc-50 dark:hover:bg-white/5 dark:focus-visible:bg-white/5";
@@ -28,14 +30,6 @@ function Thumb({ src, alt }: { src: string; alt: string }) {
       loading="lazy"
       className="h-14 w-14 shrink-0 rounded-lg bg-zinc-100 object-cover dark:bg-zinc-800"
     />
-  );
-}
-
-function Votes({ up, down }: { up: number; down: number }) {
-  return (
-    <span className="whitespace-nowrap tabular-nums">
-      👍 {formatNumber(up)} · 👎 {formatNumber(down)}
-    </span>
   );
 }
 
@@ -71,18 +65,18 @@ export function CaptionList({
             <div className="shrink-0 text-right">
               {variant === "top" ? (
                 <>
-                  <p className="text-sm font-semibold tabular-nums">{signed(caption.score)}</p>
+                  <p className="text-sm font-semibold tabular-nums">{signedScore(caption.score)}</p>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    <Votes up={caption.upvotes} down={caption.downvotes} />
+                    <VoteTally upvotes={caption.upvotes} downvotes={caption.downvotes} />
                   </p>
                 </>
               ) : (
                 <>
                   <p className="text-sm font-semibold">
-                    <Votes up={caption.upvotes} down={caption.downvotes} />
+                    <VoteTally upvotes={caption.upvotes} downvotes={caption.downvotes} />
                   </p>
                   <p className="text-xs tabular-nums text-zinc-500 dark:text-zinc-400">
-                    score {signed(caption.score)}
+                    score {signedScore(caption.score)}
                   </p>
                 </>
               )}
@@ -99,7 +93,7 @@ export function MemeList({ memes }: { memes: Dashboard["top_memes"] }) {
     <ol className="-mx-2 space-y-1">
       {memes.map((meme) => {
         // The seeded classics have no author and live on imgflip.
-        const byline = meme.author_name ?? (meme.image_path ? "Anonymous" : "Classic");
+        const byline = (meme.author_name || meme.image_path) ? displayName(meme.author_name) : "Classic";
         return (
           <li key={meme.id}>
             <Link href={`/memes/${meme.id}`} className={rowClass}>
@@ -108,17 +102,13 @@ export function MemeList({ memes }: { memes: Dashboard["top_memes"] }) {
                 <p className="line-clamp-2 text-sm font-medium leading-snug">{meme.title}</p>
                 <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
                   <span className="truncate">{byline}</span>
-                  {meme.members_only && (
-                    <span className="rounded-full bg-zinc-100 px-1.5 py-px text-[11px] text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-                      Members only
-                    </span>
-                  )}
+                  {meme.members_only && <MembersOnlyBadge />}
                 </p>
               </div>
               <div className="shrink-0 text-right">
-                <p className="text-sm font-semibold tabular-nums">{signed(meme.score)}</p>
+                <p className="text-sm font-semibold tabular-nums">{signedScore(meme.score)}</p>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  <Votes up={meme.upvotes} down={meme.downvotes} />
+                  <VoteTally upvotes={meme.upvotes} downvotes={meme.downvotes} />
                 </p>
               </div>
             </Link>

@@ -1,9 +1,9 @@
+import { UpDownBar } from "@/components/up-down-bar";
 import type { Dashboard } from "@/lib/dashboard";
-import { formatNumber } from "@/lib/format";
+import { formatNumber, plural } from "@/lib/format";
 import { DOWN, UP } from "./colors";
 import { FEW_VOTES, decimal, percent, share } from "./numbers";
 import { Legend } from "./panel";
-import { UpDownBar } from "./up-down-bar";
 
 type Kind = Dashboard["kinds"]["photo"];
 
@@ -52,14 +52,14 @@ export function AiVsHumans({
         <Side
           icon="✨"
           name="AI captions"
-          posts={`${formatNumber(ai.posts)} ${ai.posts === 1 ? "photo" : "photos"}`}
+          posts={plural(ai.posts, "photo")}
           stats={ai}
           isWinner={winner === "ai"}
         />
         <Side
           icon="😂"
           name="Memes"
-          posts={`${formatNumber(humans.posts)} ${humans.posts === 1 ? "meme" : "memes"}`}
+          posts={plural(humans.posts, "meme")}
           stats={humans}
           isWinner={winner === "humans"}
         />

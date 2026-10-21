@@ -1,14 +1,13 @@
 import Link from "next/link";
-import { Badge, Card, EmptyState, ErrorNote, hrefWith } from "@/components/ui";
+import { memeAlt } from "@/components/memes/data";
+import { MemeImage } from "@/components/memes/meme-image";
+import { MembersOnlyBadge } from "@/components/memes/members-only-badge";
+import { Card, EmptyState, ErrorNote, hrefWith } from "@/components/ui";
 import { formatNumber, signedScore } from "@/lib/format";
 import { memeImageUrl } from "@/lib/storage";
 import { timeAgo } from "@/lib/time";
 import { type UserMeme } from "./data";
 import { SeeAllLink } from "./see-all-link";
-
-// Same outlined caps as the main app's memes, scaled down for a thumbnail.
-const memeText =
-  "pointer-events-none absolute inset-x-1.5 break-words text-center text-sm font-black uppercase leading-tight text-white [text-shadow:_1px_1px_0_#000,_-1px_-1px_0_#000,_1px_-1px_0_#000,_-1px_1px_0_#000]";
 
 // A user's newest memes, each opening its admin page.
 export function UserMemes({
@@ -42,19 +41,13 @@ export function UserMemes({
                 href={`/memes/${meme.id}`}
                 className="group block h-full overflow-hidden rounded-xl border border-zinc-200 bg-surface shadow-sm transition hover:shadow-md dark:border-zinc-800"
               >
-                <span className="relative block aspect-[4/3] overflow-hidden bg-zinc-900">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={memeImageUrl(meme)}
-                    alt={`Meme: ${meme.title}`}
-                    loading="lazy"
-                    className="h-full w-full object-contain"
-                  />
-                  {meme.top_text && <span className={`${memeText} top-1.5`}>{meme.top_text}</span>}
-                  {meme.bottom_text && (
-                    <span className={`${memeText} bottom-1.5`}>{meme.bottom_text}</span>
-                  )}
-                </span>
+                <MemeImage
+                  src={memeImageUrl(meme)}
+                  alt={memeAlt(meme)}
+                  topText={meme.top_text}
+                  bottomText={meme.bottom_text}
+                  variant="thumb"
+                />
                 <span className="block px-3 py-2">
                   {/* The score sits here, not on the image, where the meme's
                       own top text would cover it. */}
@@ -71,7 +64,7 @@ export function UserMemes({
                   </span>
                   {meme.members_only && (
                     <span className="mt-1 block">
-                      <Badge tone="blue">🔓 Members only</Badge>
+                      <MembersOnlyBadge />
                     </span>
                   )}
                   <span className="mt-0.5 block truncate text-xs tabular-nums text-zinc-500 dark:text-zinc-400">

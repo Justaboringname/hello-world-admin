@@ -17,7 +17,8 @@ export type SeriesKey = keyof typeof SERIES;
 // reads as one measure.
 export const SIGNUPS_TRACK = "bg-[#1baf7a]/20 dark:bg-[#199e70]/30";
 
-// 👍 and 👎 are opposites, so they get opposite hues (cool and warm).
+// 👍 and 👎 are opposites, so they get opposite hues (cool and warm). Every
+// page's 👍/👎 bar uses these, through components/up-down-bar.tsx.
 export const UP = "bg-[#2a78d6] dark:bg-[#3987e5]";
 export const DOWN = "bg-[#e34948] dark:bg-[#e66767]";
 

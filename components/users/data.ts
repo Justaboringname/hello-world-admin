@@ -1,10 +1,10 @@
-import type { Meme, VoteValue } from "@/lib/captions";
+import type { Meme } from "@/lib/captions";
 import { fullName } from "@/lib/format";
 
 // Row shapes for the users pages. The Supabase client is untyped, so these
-// mirror admin_users(), the admin_generations view and the admin_votes view
-// in supabase/admin.sql. Counts are bigint there, which PostgREST sends as
-// plain JSON numbers.
+// mirror admin_users() and the admin_generations view in supabase/admin.sql
+// (a user's votes are VoteRows, from components/votes/data.ts). Counts are
+// bigint there, which PostgREST sends as plain JSON numbers.
 
 export type AdminUser = {
   id: string;
@@ -55,26 +55,13 @@ export type UserMeme = Pick<
 export const USER_MEME_COLUMNS =
   "id, title, image_url, image_path, top_text, bottom_text, members_only, upvotes, downvotes, score, created_at";
 
-// For a caption vote, item_id is the caption and post_id its photo; for a
-// meme vote both are the meme.
-export type UserVote = {
-  kind: "caption" | "meme";
-  item_id: number;
-  post_id: number;
-  label: string;
-  vote: VoteValue;
-  created_at: string;
-};
-
-export const USER_VOTE_COLUMNS = "kind, item_id, post_id, label, vote, created_at";
-
 // The sort tabs on /users. Column names end up in the query string, so they
 // come from this list and never from the URL.
 export const USER_SORTS = {
   new: { label: "Newest", column: "created_at" },
   active: { label: "Most votes cast", column: "votes_cast" },
   upvotes: { label: "Most 👍 received", column: "upvotes_received" },
-  seen: { label: "Recently seen", column: "last_sign_in_at" },
+  seen: { label: "Last signed in", column: "last_sign_in_at" },
 } as const;
 
 export type UserSort = keyof typeof USER_SORTS;
@@ -96,4 +83,3 @@ export function providerLabel(provider: string | null) {
   if (!provider) return "–";
   return provider.charAt(0).toUpperCase() + provider.slice(1);
 }
-

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { CreateMediaForm } from "@/components/media/create-media-form";
-import { Card, PageHeader } from "@/components/ui";
+import { BackLink, Card, PageHeader } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "New AI photo" };
@@ -14,10 +13,8 @@ export default async function NewMediaPage() {
   const admin = await requireAdmin("/media/new");
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <Link href="/media" className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white">
-        ← All AI media
-      </Link>
+    <div className="max-w-2xl">
+      <BackLink href="/media">All AI media</BackLink>
       <div className="mt-3">
         <PageHeader
           title="New AI photo"

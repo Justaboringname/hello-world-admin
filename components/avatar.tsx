@@ -26,10 +26,14 @@ export function Avatar({
   src,
   name,
   size = "sm",
+  decorative = false,
 }: {
   src: string | null | undefined;
   name: string;
   size?: keyof typeof sizes;
+  // The name is shown right beside it, so the photo needs no alt text of its
+  // own: screen readers would hear the name twice.
+  decorative?: boolean;
 }) {
   const initials =
     name
@@ -46,7 +50,7 @@ export function Avatar({
       <img
         src={safeSrc}
         loading="lazy"
-        alt={`${name}'s profile photo`}
+        alt={decorative ? "" : `${name}'s profile photo`}
         className={`${sizes[size]} shrink-0 overflow-hidden rounded-full bg-zinc-200 object-cover dark:bg-zinc-800`}
       />
     );
