@@ -1,0 +1,35 @@
+# Lint and build every pull request and every push to main. Vercel deploys
+# (a preview per branch, main to production); this checks the same code
+# before anyone merges it.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# A newer push to the same branch or PR replaces the run still going.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          # The Vercel project builds on Node.js 24.x.
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      # next build type-checks too. It needs no secrets: the Supabase URL and
+      # key are only read when a request comes in.
+      - run: npm run build
