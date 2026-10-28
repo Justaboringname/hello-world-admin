@@ -270,21 +270,22 @@ create policy "Superadmins can manage whitelisted emails"
 -- Copied from lib/gemini.ts and lib/captions.ts on 2026-10-28. "on conflict do
 -- nothing" everywhere, so re-running this never overwrites an admin's edits.
 insert into public.llm_providers (name, website)
-values ('Google', 'https://ai.google.dev')
+values ('Google', 'https://ai.google.dev'), ('Anthropic', 'https://www.anthropic.com')
 on conflict (name) do nothing;
 
--- The main app's first choice and its fallback, plus Gemini 3.5 Flash, which
--- it used before switching to Flash-Lite on 2026-10-07 (one photo still has
--- it). All thinking models, so no temperature.
+-- The main app's first choice (Claude, since 2026-10-28) and its two
+-- Gemini fallbacks, plus Gemini 3.5 Flash, which it used before switching to
+-- Flash-Lite on 2026-10-07 (one photo still has it). All thinking models, so
+-- no temperature. A database seeded before Claude: run claude.sql once.
 insert into public.llm_models (provider_id, name, api_model_id, supports_temperature, is_active)
 select p.id, m.name, m.api_model_id, false, m.is_active
   from public.llm_providers p
- cross join (values
-   ('Gemini 3.5 Flash-Lite (default)', 'gemini-3.5-flash-lite', true),
-   ('Gemini 3.1 Flash-Lite (fallback)', 'gemini-3.1-flash-lite', true),
-   ('Gemini 3.5 Flash (until Oct 7)', 'gemini-3.5-flash', false)
- ) as m (name, api_model_id, is_active)
- where p.name = 'Google'
+  join (values
+   ('Anthropic', 'Claude Opus 5.5 (default)', 'claude-opus-5-5', true),
+   ('Google', 'Gemini 3.5 Flash-Lite (first fallback)', 'gemini-3.5-flash-lite', true),
+   ('Google', 'Gemini 3.1 Flash-Lite (second fallback)', 'gemini-3.1-flash-lite', true),
+   ('Google', 'Gemini 3.5 Flash (until Oct 7)', 'gemini-3.5-flash', false)
+ ) as m (provider, name, api_model_id, is_active) on m.provider = p.name
 on conflict (api_model_id) do nothing;
 
 insert into public.prompt_chains (slug, name, description)
@@ -295,8 +296,9 @@ values
   ('newyorker', '🗽 Jaded New Yorker', 'Seen it all, impressed by none of it')
 on conflict (slug) do nothing;
 
--- One step per chain today: a single Gemini call that sees the photo and
--- returns three captions as JSON. {location_line} is "The poster says it was
+-- One step per chain today: a single call that sees the photo and returns
+-- three captions as JSON, to Claude (Gemini when Claude can't
+-- answer). {location_line} is "The poster says it was
 -- taken at: "<location>"." or "The poster didn't say where in New York it
 -- was taken."
 insert into public.prompt_chain_steps
@@ -304,7 +306,7 @@ insert into public.prompt_chain_steps
 select c.id,
        1,
        'Caption the photo',
-       (select id from public.llm_models where api_model_id = 'gemini-3.5-flash-lite'),
+       (select id from public.llm_models where api_model_id = 'claude-opus-5-5'),
        null,
        $prompt$You write photo captions for a website where college students who are new to New York City post photos from around the city, and everyone votes on the funniest caption.
 

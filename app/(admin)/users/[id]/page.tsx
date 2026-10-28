@@ -89,7 +89,7 @@ export default async function UserPage({ params }: PageProps<"/users/[id]">) {
           label="AI photos"
           value={user.photos}
           href={hrefWith("/media", { user: user.id })}
-          hint="Posted for Gemini to caption"
+          hint="Posted for AI captions"
         />
         <StatTile
           label="Memes"

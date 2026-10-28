@@ -4,7 +4,7 @@ import { SERIES } from "./colors";
 import { HBar } from "./bar";
 import { averageScore, ordinal, percent, share } from "./numbers";
 
-// Which caption slot wins each photo. Gemini writes 3 captions by default
+// Which caption slot wins each photo. The AI writes 3 captions by default
 // (admins can add up to 5), so "no bias" means each slot wins about 1 in 3.
 export function positionStats(
   positions: Dashboard["positions"],
@@ -39,7 +39,7 @@ type Stats = ReturnType<typeof positionStats>;
 // Fewer decided photos than this, and any answer is a coin toss.
 const MIN_DECIDED = 5;
 
-// "Does Gemini save its best joke for first?", answered in a sentence.
+// "Does the AI save its best joke for first?", answered in a sentence.
 export function positionHeadline({ rows, even, leader, decided }: Stats) {
   if (!decided || rows.length === 0) return "No photo has a clear winner yet";
   if (decided < MIN_DECIDED) {

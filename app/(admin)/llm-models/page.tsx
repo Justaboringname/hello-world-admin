@@ -82,7 +82,7 @@ export default async function LlmModelsPage() {
     <>
       <PageHeader
         title="LLM models"
-        description="The models a prompt chain step can call, and which steps use them. The main app still picks its Gemini models in code (lib/gemini.ts) and doesn't read this table yet."
+        description="The models a prompt chain step can call, and which steps use them. The main app picks its models in code (Claude Opus 5.5 first, then Gemini: lib/claude.ts and lib/gemini.ts) and doesn't read this table yet."
       />
       {modelsResult.error ? (
         <LoadError what="LLM models" error={modelsResult.error} setupFile="supabase/week7.sql" />

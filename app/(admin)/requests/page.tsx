@@ -47,7 +47,7 @@ function ModelBadge({ model }: { model: string }) {
   );
 }
 
-// Every photo in generations is one request to Gemini: its prompts, model and
+// Every photo in generations is one caption request: its prompts, model and
 // time are saved with it. Nothing else is logged yet.
 export default async function RequestsPage({ searchParams }: PageProps<"/requests">) {
   await requireAdmin("/requests");
@@ -88,7 +88,7 @@ export default async function RequestsPage({ searchParams }: PageProps<"/request
     <>
       <PageHeader
         title="Generation requests"
-        description="Each photo posted for Gemini to caption is one request, saved with its exact prompts and the model that answered. Only requests that worked are saved: failed Gemini calls aren't logged yet, here or in the main app."
+        description="Each photo posted for AI captions is one request, saved with its exact prompts and the model that answered: Claude Opus 5.5, or Gemini when Claude couldn't. Only requests that worked are saved: failed calls aren't logged yet, here or in the main app."
       />
 
       <div className="mb-5">
@@ -151,7 +151,7 @@ export default async function RequestsPage({ searchParams }: PageProps<"/request
                     </p>
                     <details className="mt-2">
                       <summary className="cursor-pointer text-sm font-medium">
-                        {isManual ? "Saved prompts (nothing was sent to Gemini)" : "Exact prompts sent"}
+                        {isManual ? "Saved prompts (no AI was called)" : "Exact prompts sent"}
                       </summary>
                       <Prompt
                         label="System prompt"

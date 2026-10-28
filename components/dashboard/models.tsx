@@ -41,8 +41,8 @@ export function modelHeadline({ rows: all, photos }: Stats) {
   return `${rows[0]!.model} captioned ${percent(share(rows[0]!.photos, photos))} of photos`;
 }
 
-// Photos per model, as a share of all photos. The model is whichever Gemini
-// model answered, after any fallback (lib/gemini.ts).
+// Photos per model, as a share of all photos. The model is whichever one
+// answered, after any fallback (Claude first, then Gemini; lib/gemini.ts).
 export function ModelBoard({ stats }: { stats: Stats }) {
   return (
     <ol className="space-y-4">

@@ -18,7 +18,7 @@ function sideStats(kind: Kind) {
   };
 }
 
-// Who gets the bigger share of 👍: Gemini's captions or memes people made.
+// Who gets the bigger share of 👍: AI captions or memes people made.
 // The upvote rate ignores how many posts each side has, so it's fair even
 // when one side has far more posts.
 export function compareKinds(kinds: Dashboard["kinds"]) {

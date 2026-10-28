@@ -45,7 +45,7 @@ export default async function TermsPage() {
     <>
       <PageHeader
         title="Terms"
-        description="Columbia and New York lore the captions can lean on, like Butler or Lit Hum. Not sent to Gemini yet: the main app's prompts still name a few by hand."
+        description="Columbia and New York lore the captions can lean on, like Butler or Lit Hum. Not sent to the AI yet: the main app's prompts still name a few by hand."
       />
       {error ? (
         <LoadError what="terms" error={error} setupFile="supabase/week7.sql" />

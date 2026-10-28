@@ -5,8 +5,8 @@ import { requireAdmin } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "New AI photo" };
 
-// The Server Action on this page waits for Gemini (lib/gemini.ts gives up
-// after 50 s), then uploads and saves.
+// The Server Action on this page waits for the captions (Claude, then Gemini
+// if needed; lib/gemini.ts gives up after 50 s), then uploads and saves.
 export const maxDuration = 60;
 
 export default async function NewMediaPage() {
