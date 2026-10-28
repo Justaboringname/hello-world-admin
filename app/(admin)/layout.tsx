@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/">) {
         Skip to content
       </a>
       <aside className="sticky top-0 z-30 border-b border-zinc-200/80 bg-white/90 backdrop-blur-md lg:h-screen lg:w-60 lg:shrink-0 lg:border-b-0 lg:border-r dark:border-zinc-800/80 dark:bg-zinc-950/85">
-        <div className="flex h-full flex-col gap-3 px-3 py-3 lg:gap-6 lg:py-5">
+        <div className="flex h-full flex-col gap-3 px-3 py-3 lg:gap-6 lg:overflow-y-auto lg:py-5">
           <div className="flex items-center justify-between gap-2 px-1">
             <Link href="/" className="flex items-center gap-2 font-semibold">
               <Logo />

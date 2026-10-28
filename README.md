@@ -1,6 +1,6 @@
 # Hello World Admin
 
-Week 6: an admin panel for the
+Weeks 6 and 7: an admin panel for the
 [Hello World](https://github.com/Justaboringname/hello-world) caption and meme
 app. It's a separate Next.js app in its own repository and Vercel project,
 sharing the main app's Supabase database and Google sign-in. Only users whose
@@ -16,7 +16,28 @@ sharing the main app's Supabase database and Google sign-in. Only users whose
 | `/media/[id]`  | **Update** a photo's location and vibe, reword, add or remove captions, see the exact prompt. **Delete** the photo with its captions, votes and image |
 | `/memes`, `/memes/[id]` | Moderate memes: edit the text, make one members-only, delete it      |
 | `/votes`       | **Read** every 👍/👎 (who, on what, when), and the ratings: captions and memes ranked by score |
+| `/prompt-chains` | **Read** each vibe's prompt chain and its steps (model, temperature, the exact prompts). **Read/update** the prompt chain mix |
+| `/requests`    | **Read** every generation request: who, which vibe and model, the exact prompts, how many captions came back |
+| `/responses`   | **Read** every LLM response: the captions each request returned, with their votes |
+| `/examples`    | **Create/read/update/delete** example captions that show a chain's voice |
+| `/terms`       | **Create/read/update/delete** Columbia and NYC lore terms (Butler, Lit Hum, …) |
+| `/llm-models`, `/llm-providers` | **Create/read/update/delete** LLM models and the providers they come from |
+| `/access`      | **Create/read/update/delete** allowed sign-up domains and whitelisted email addresses |
 | `/login`, `/auth/callback`, `/denied` | The only pages open without being a superadmin           |
+
+## Week 7: more observability
+
+Week 7 adds the rest of the pipeline to the panel. The new tables come from
+[`supabase/week7.sql`](supabase/week7.sql); generation requests and LLM
+responses are the main app's existing `generations` and `captions` (one photo
+is one request to Gemini, and its captions are the response).
+
+The chains, steps and models are seeded from the main app's `lib/gemini.ts`,
+so they show what really runs today: one step per vibe, on Gemini Flash-Lite.
+The main app still runs those prompts from code and doesn't read these tables
+yet, and sign-in doesn't check the sign-up domains or the whitelist yet.
+Every new table has RLS on with superadmin-only policies, and column grants
+keep ids and timestamps out of reach, like the Week 6 tables.
 
 ## Keeping everyone else out
 
@@ -88,6 +109,8 @@ run [`supabase/admin.sql`](supabase/admin.sql). Put your Google email in step 8
 first, or edit and run just that statement afterwards. Sign in with Google
 once before running it (to either app), so you have a profile. The file is
 safe to re-run. Its last result lists the superadmins: expect your email.
+Then run [`supabase/week7.sql`](supabase/week7.sql), also safe to re-run. Its
+last result lists the Week 7 tables: each should have RLS on and a policy.
 
 ### 2. Supabase Auth
 

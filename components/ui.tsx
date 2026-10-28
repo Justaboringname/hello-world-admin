@@ -85,15 +85,23 @@ export function ErrorNote({ children }: { children: React.ReactNode }) {
 }
 
 // PostgREST's codes for a missing function (PGRST202) and a missing table or
-// view (PGRST205). Every admin_* one comes from admin.sql, so it likely hasn't
-// been run.
+// view (PGRST205). Every admin_* one comes from admin.sql and every Week 7
+// table from week7.sql, so the page names the file that likely hasn't been run.
 const SETUP_CODES = ["PGRST202", "PGRST205"];
 
-export function LoadError({ what, error }: { what: string; error: { code?: string; message: string } }) {
+export function LoadError({
+  what,
+  error,
+  setupFile = "supabase/admin.sql",
+}: {
+  what: string;
+  error: { code?: string; message: string };
+  setupFile?: string;
+}) {
   return (
     <ErrorNote>
       Couldn&apos;t load {what}: {error.message || "the database didn't answer."}
-      {error.code && SETUP_CODES.includes(error.code) && " Has supabase/admin.sql been run in the SQL Editor?"}
+      {error.code && SETUP_CODES.includes(error.code) && ` Has ${setupFile} been run in the SQL Editor?`}
     </ErrorNote>
   );
 }
