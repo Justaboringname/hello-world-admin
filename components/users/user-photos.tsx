@@ -25,7 +25,7 @@ export function UserPhotos({
       description={
         photos.length > 0 && total > photos.length
           ? `Newest ${photos.length} of ${formatNumber(total)}`
-          : "Photos they posted for Gemini to caption"
+          : "Photos they posted for AI captions"
       }
       actions={total > 0 && <SeeAllLink href={hrefWith("/media", { user: userId })} label="AI photos by this user" />}
     >

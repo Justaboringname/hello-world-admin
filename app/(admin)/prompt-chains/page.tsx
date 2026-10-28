@@ -112,7 +112,7 @@ export default async function PromptChainsPage() {
               These chains are seeded from the main app&apos;s <code className="font-mono">lib/gemini.ts</code>.
               The main app still runs those prompts from code and doesn&apos;t read these tables yet, and
               neither does <code className="font-mono">/media/new</code> here. Each chain is one step today:
-              one Gemini call that sees the photo and returns three captions.
+              one call to Claude Opus 5.5 (Gemini when Claude can&apos;t answer) that sees the photo and returns three captions.
             </p>
             <p>
               In a user prompt, <code className="font-mono">{"{location_line}"}</code> is filled in for each

@@ -1,7 +1,9 @@
 import "server-only";
 import { ApiError, GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { VIBES, type Vibe } from "@/lib/captions";
+import { ClaudeCallError, claudeJson } from "@/lib/claude";
 
+// Captions come from Claude first (lib/claude.ts); Gemini is the fallback.
 // Flash-Lite models get about 500 free requests a day per project, Flash
 // models about 20, so a free key starts on Flash-Lite. GEMINI_MODEL picks a
 // different first choice (e.g. gemini-3.8-flash for better jokes, fewer
@@ -16,6 +18,7 @@ const RETRY_STATUSES = [408, 429, 500, 502, 503, 504];
 const ATTEMPTS_PER_MODEL = 2;
 const ATTEMPT_TIMEOUT_MS = 20_000;
 // /media/new allows 60 s (maxDuration); leave time to upload and save afterwards.
+// Claude and Gemini share this deadline.
 const DEADLINE_MS = 50_000;
 // A model that stalls stops here, so the last one still gets a full attempt.
 const MODEL_BUDGET_MS = DEADLINE_MS - ATTEMPT_TIMEOUT_MS;
@@ -48,6 +51,17 @@ function buildPrompt(vibe: Vibe, location: string | null) {
   return `Voice: write as ${VIBES[vibe].instruction}\n${where}\nCaption this photo.`;
 }
 
+// Claude's structured outputs need additionalProperties: false and don't take
+// minItems/maxItems, so there the prompt asks for the count. parseCaptions
+// enforces it for both models.
+const CLAUDE_CAPTIONS_SCHEMA = {
+  type: "object",
+  properties: { captions: { type: "array", items: { type: "string" } } },
+  required: ["captions"],
+  additionalProperties: false,
+};
+
+// Claude writes the captions, and Gemini takes over whenever it can't.
 // Returns the captions plus the exact prompt text and model used, so they can
 // be saved alongside the photo.
 export async function generateCaptions({
@@ -61,16 +75,43 @@ export async function generateCaptions({
   vibe: Vibe;
   location: string | null;
 }): Promise<CaptionResult> {
+  const prompt = buildPrompt(vibe, location);
+  // Claude stops after its share (lib/claude.ts); Gemini gets what's left.
+  const deadline = AbortSignal.timeout(DEADLINE_MS);
+
+  try {
+    const answer = await claudeJson({
+      image,
+      mimeType,
+      system: SYSTEM_PROMPT,
+      prompt,
+      schema: CLAUDE_CAPTIONS_SCHEMA,
+      signal: deadline,
+    });
+    const captions = parseCaptions(answer.text);
+    if (captions.length > 0) {
+      return { captions, systemPrompt: SYSTEM_PROMPT, prompt, model: answer.model };
+    }
+    console.error(`${answer.model} returned no usable captions; falling back to Gemini`);
+  } catch (error) {
+    // Without a key, Gemini simply does the work; anything else is worth a look.
+    if (!(error instanceof ClaudeCallError && error.reason === "missing-key")) {
+      console.error("Claude caption request failed; falling back to Gemini", error);
+    }
+  }
+
   const apiKey = process.env.GEMINI_API_KEY?.trim();
-  if (!apiKey) throw new CaptionError("Caption generation isn't set up yet (missing GEMINI_API_KEY).");
+  if (!apiKey) {
+    throw new CaptionError(
+      "Caption generation isn't fully set up (missing GEMINI_API_KEY, the fallback when Claude can't answer).",
+    );
+  }
 
   // Always two different models: the first choice, then the next default.
   const models = [
     ...new Set([process.env.GEMINI_MODEL?.trim() || DEFAULT_MODEL, DEFAULT_MODEL, FALLBACK_MODEL]),
   ].slice(0, 2);
-  const prompt = buildPrompt(vibe, location);
   const ai = new GoogleGenAI({ apiKey });
-  const deadline = AbortSignal.timeout(DEADLINE_MS);
 
   let lastError: unknown;
   for (const [index, model] of models.entries()) {

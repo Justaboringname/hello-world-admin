@@ -78,7 +78,7 @@ function kindsHeadline({ ai, humans, winner }: ReturnType<typeof compareKinds>) 
   if (winner === "tie") return `A dead heat: both get 👍 about ${percent(ai.rate)} of the time`;
   return winner === "humans"
     ? `Humans win: memes get 👍 ${percent(humans.rate)} of the time, AI captions ${percent(ai.rate)}`
-    : `AI wins: Gemini's captions get 👍 ${percent(ai.rate)} of the time, memes ${percent(humans.rate)}`;
+    : `AI wins: AI captions get 👍 ${percent(ai.rate)} of the time, memes ${percent(humans.rate)}`;
 }
 
 const andList = new Intl.ListFormat("en", { type: "conjunction" });
@@ -235,7 +235,7 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
         <Panel
           id="top-captions"
           topic="Best captions"
-          title={topCaption ? `Gemini's best line scored ${signedScore(topCaption.score)}` : "No caption votes yet"}
+          title={topCaption ? `The AI's best line scored ${signedScore(topCaption.score)}` : "No caption votes yet"}
         >
           {d.top_captions.length ? (
             <CaptionList captions={d.top_captions.slice(0, TOP_N)} variant="top" />
@@ -341,7 +341,7 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
 
           <Panel
             id="positions"
-            topic="Does Gemini save its best joke for first?"
+            topic="Does the AI save its best joke for first?"
             title={positionHeadline(positions)}
             description={
               positions.decided
@@ -358,7 +358,7 @@ export function DashboardView({ dashboard }: { dashboard: Dashboard }) {
 
           <Panel
             id="models"
-            topic="Gemini models"
+            topic="Caption models"
             title={modelHeadline(models)}
             description="Photos per model, and how their captions scored."
           >

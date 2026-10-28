@@ -118,7 +118,7 @@ export default async function MediaPage({ searchParams }: PageProps<"/media">) {
 
       <PageHeader
         title="AI media"
-        description="Every photo people posted for Gemini to caption, with the captions' votes. Open one to edit its details and captions, or to delete it."
+        description="Every photo people posted for AI captions, with the captions' votes. Open one to edit its details and captions, or to delete it."
         actions={
           <Link
             href="/media/new"

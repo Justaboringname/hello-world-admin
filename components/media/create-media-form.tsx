@@ -23,7 +23,7 @@ import {
 import { ActionMessage } from "@/components/action-message";
 import { resizeImage } from "@/lib/resize-image";
 
-type Mode = "gemini" | "manual";
+type Mode = "ai" | "manual";
 
 const inputClass =
   "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900";
@@ -37,9 +37,9 @@ function choiceClass(selected: boolean) {
 }
 
 const MODES: Record<Mode, { emoji: string; label: string; blurb: string }> = {
-  gemini: {
+  ai: {
     emoji: "✨",
-    label: "Let Gemini write 3 captions",
+    label: "Let AI write 3 captions",
     blurb: "Same prompt and models as the main app",
   },
   manual: {
@@ -57,7 +57,7 @@ export function CreateMediaForm() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [vibe, setVibe] = useState<Vibe>("midwest");
-  const [mode, setMode] = useState<Mode>("gemini");
+  const [mode, setMode] = useState<Mode>("ai");
   const [captionBoxes, setCaptionBoxes] = useState(3);
   const [state, formAction, pending] = useActionState(createMedia, IDLE);
 
@@ -213,7 +213,7 @@ export function CreateMediaForm() {
       </fieldset>
 
       {/* Hidden and disabled rather than removed, so switching modes back and
-          forth keeps what was typed, and Gemini mode doesn't send it. */}
+          forth keeps what was typed, and AI mode doesn't send it. */}
       <fieldset
         hidden={mode !== "manual"}
         disabled={mode !== "manual" || pending}
@@ -246,16 +246,16 @@ export function CreateMediaForm() {
           disabled={pending}
           className="rounded-full bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-wait disabled:opacity-60"
         >
-          {mode === "gemini"
+          {mode === "ai"
             ? pending
-              ? "Gemini is writing captions…"
+              ? "The AI is writing captions…"
               : "Generate captions ✨"
             : pending
               ? "Saving…"
               : "Create photo"}
         </button>
-        {pending && mode === "gemini" && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">This can take up to a minute when Gemini is busy.</p>
+        {pending && mode === "ai" && (
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">This can take up to a minute when the models are busy.</p>
         )}
       </div>
 

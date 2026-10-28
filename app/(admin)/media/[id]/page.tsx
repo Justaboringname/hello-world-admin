@@ -89,7 +89,7 @@ export default async function MediaDetailPage({ params, searchParams }: PageProp
 
       {created && (
         <FlashBanner param="created" title="🎉 Photo created">
-          {isManual ? "Your" : "Gemini's"} {plural(captions.length, "caption is", "captions are")} live in
+          {isManual ? "Your" : "The AI's"} {plural(captions.length, "caption is", "captions are")} live in
           the main app{appLink ? <>: {appLink}</> : "."}
         </FlashBanner>
       )}
@@ -166,7 +166,7 @@ export default async function MediaDetailPage({ params, searchParams }: PageProp
 
           <details className="rounded-2xl border border-zinc-200 bg-surface p-5 shadow-sm dark:border-zinc-800">
             <summary className="cursor-pointer font-semibold">
-              {isManual ? "How this photo was captioned" : "How Gemini was asked"}
+              {isManual ? "How this photo was captioned" : "How the AI was asked"}
             </summary>
             <p className="mt-3 text-sm text-zinc-500 dark:text-zinc-400">
               Model <span className="font-mono text-zinc-900 dark:text-zinc-100">{generation.model}</span>. Saved

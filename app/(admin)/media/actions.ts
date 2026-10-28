@@ -48,7 +48,7 @@ const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0
 
 // The declared type is only what the request claims; the first bytes say what
 // the file really is. That matters most for "Write them myself": nothing else
-// looks at the file (Gemini would refuse a non-photo) before it's public.
+// looks at the file (the AI would refuse a non-photo) before it's public.
 function sniffImageType(bytes: Buffer) {
   if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg";
   if (bytes.subarray(0, 8).equals(PNG_SIGNATURE)) return "image/png";
@@ -88,7 +88,7 @@ function revalidateMedia(generationId: number | null, userId: string | null | un
 // CREATE -----------------------------------------------------------------------
 
 // Photo in, captions out, like the main app's /create: get the captions first
-// (so a Gemini failure leaves nothing behind), then store the photo and save
+// (so an AI failure leaves nothing behind), then store the photo and save
 // the row and its captions in one transaction. The photo is posted as the
 // admin, in their own Storage folder, because that's what the policies allow.
 export async function createMedia(_prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -106,7 +106,7 @@ export async function createMedia(_prev: ActionState, formData: FormData): Promi
   if (!isVibe(vibe)) return fail("Please pick a vibe.");
   const locationError = checkLocation(location);
   if (locationError) return fail(locationError);
-  if (mode !== "gemini" && mode !== "manual") return fail("Pick who writes the captions.");
+  if (mode !== "ai" && mode !== "manual") return fail("Pick who writes the captions.");
 
   const image = Buffer.from(await photo.arrayBuffer());
   if (sniffImageType(image) !== photo.type) {

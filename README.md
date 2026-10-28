@@ -8,11 +8,11 @@ sharing the main app's Supabase database and Google sign-in. Only users whose
 
 | Route          | What it does                                                                 |
 | -------------- | ---------------------------------------------------------------------------- |
-| `/`            | Dashboard: KPIs and week-over-week trends, 30 days of activity, when people vote (day × hour heatmap), the sign-up → regular funnel, AI captions vs. memes, which vibe and which caption position wins, Gemini models, hall of fame, awards, top locations |
+| `/`            | Dashboard: KPIs and week-over-week trends, 30 days of activity, when people vote (day × hour heatmap), the sign-up → regular funnel, AI captions vs. memes, which vibe and which caption position wins, caption models, hall of fame, awards, top locations |
 | `/users`       | **Read** every user: Google email, name, sign-in dates, posts, votes cast, 👍 received. Search and sort |
 | `/users/[id]`  | One user's profile, photos, memes and recent votes                            |
 | `/media`       | **Read** every AI photo and its captions. Search, filter by vibe or user, sort by votes or find unvoted ones |
-| `/media/new`   | **Create** an AI photo: upload, pick a vibe, and let Gemini write the captions (or write them yourself) |
+| `/media/new`   | **Create** an AI photo: upload, pick a vibe, and let AI write the captions (Claude first, Gemini as the fallback), or write them yourself |
 | `/media/[id]`  | **Update** a photo's location and vibe, reword, add or remove captions, see the exact prompt. **Delete** the photo with its captions, votes and image |
 | `/memes`, `/memes/[id]` | Moderate memes: edit the text, make one members-only, delete it      |
 | `/votes`       | **Read** every 👍/👎 (who, on what, when), and the ratings: captions and memes ranked by score |
@@ -30,10 +30,11 @@ sharing the main app's Supabase database and Google sign-in. Only users whose
 Week 7 adds the rest of the pipeline to the panel. The new tables come from
 [`supabase/week7.sql`](supabase/week7.sql); generation requests and LLM
 responses are the main app's existing `generations` and `captions` (one photo
-is one request to Gemini, and its captions are the response).
+is one caption request, and its captions are the response).
 
 The chains, steps and models are seeded from the main app's `lib/gemini.ts`,
-so they show what really runs today: one step per vibe, on Gemini Flash-Lite.
+so they show what really runs today: one step per vibe, on Claude Opus 5.5
+with Gemini Flash-Lite as the fallback.
 The main app still runs those prompts from code and doesn't read these tables
 yet, and sign-in doesn't check the sign-up domains or the whitelist yet.
 Every new table has RLS on with superadmin-only policies, and column grants
@@ -111,6 +112,8 @@ once before running it (to either app), so you have a profile. The file is
 safe to re-run. Its last result lists the superadmins: expect your email.
 Then run [`supabase/week7.sql`](supabase/week7.sql), also safe to re-run. Its
 last result lists the Week 7 tables: each should have RLS on and a policy.
+A database seeded with `week7.sql` before Claude became the caption model
+(2026-10-28) also needs [`supabase/claude.sql`](supabase/claude.sql) once.
 
 ### 2. Supabase Auth
 
@@ -132,6 +135,7 @@ app. Then:
   ```
   NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
   NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon or publishable key>
+  ANTHROPIC_API_KEY=<same key as the main app>    # for /media/new, tried first
   GEMINI_API_KEY=<same key as the main app>       # for /media/new
   GEMINI_MODEL=                                   # optional
   NEXT_PUBLIC_MAIN_APP_URL=https://<main-app-domain>  # optional: "View in app" links

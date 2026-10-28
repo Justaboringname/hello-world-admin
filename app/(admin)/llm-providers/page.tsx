@@ -45,7 +45,7 @@ export default async function LlmProvidersPage() {
     <>
       <PageHeader
         title="LLM providers"
-        description="The companies whose models we call. Every LLM model belongs to one. The main app doesn't read this table yet: it calls Gemini with models picked in its code."
+        description="The companies whose models we call. Every LLM model belongs to one. The main app doesn't read this table yet: it calls Claude, then Gemini when Claude can't answer, with models picked in its code."
       />
       {error ? (
         <LoadError what="providers" error={error} setupFile="supabase/week7.sql" />

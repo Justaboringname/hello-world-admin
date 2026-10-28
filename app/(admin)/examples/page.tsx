@@ -86,7 +86,7 @@ export default async function ExamplesPage({
     <>
       <PageHeader
         title="Examples"
-        description="Example captions that show a chain's voice, meant as few-shot grounding. Not sent to Gemini yet: the main app's prompts only describe each voice."
+        description="Example captions that show a chain's voice, meant as few-shot grounding. Not sent to the AI yet: the main app's prompts only describe each voice."
       />
       {chainsResult.error ? (
         <LoadError what="prompt chains" error={chainsResult.error} setupFile="supabase/week7.sql" />
