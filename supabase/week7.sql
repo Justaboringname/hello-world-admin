@@ -273,15 +273,17 @@ insert into public.llm_providers (name, website)
 values ('Google', 'https://ai.google.dev')
 on conflict (name) do nothing;
 
--- The main app's first choice and its fallback. Both are thinking models, so
--- no temperature.
+-- The main app's first choice and its fallback, plus Gemini 3.5 Flash, which
+-- it used before switching to Flash-Lite on 2026-10-07 (one photo still has
+-- it). All thinking models, so no temperature.
 insert into public.llm_models (provider_id, name, api_model_id, supports_temperature, is_active)
-select p.id, m.name, m.api_model_id, false, true
+select p.id, m.name, m.api_model_id, false, m.is_active
   from public.llm_providers p
  cross join (values
-   ('Gemini 3.5 Flash-Lite (default)', 'gemini-3.5-flash-lite'),
-   ('Gemini 3.1 Flash-Lite (fallback)', 'gemini-3.1-flash-lite')
- ) as m (name, api_model_id)
+   ('Gemini 3.5 Flash-Lite (default)', 'gemini-3.5-flash-lite', true),
+   ('Gemini 3.1 Flash-Lite (fallback)', 'gemini-3.1-flash-lite', true),
+   ('Gemini 3.5 Flash (until Oct 7)', 'gemini-3.5-flash', false)
+ ) as m (name, api_model_id, is_active)
  where p.name = 'Google'
 on conflict (api_model_id) do nothing;
 
