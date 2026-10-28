@@ -29,7 +29,7 @@ update public.prompt_chain_steps
    and name = 'Caption the photo'
    and model_id = (select id from public.llm_models where api_model_id = 'gemini-3.5-flash-lite');
 
--- Check: the models in order of use, and which model each chain's step calls.
+-- Check: which model each chain's step calls.
 select c.slug, s.step_order, m.name as model, m.api_model_id
   from public.prompt_chain_steps s
   join public.prompt_chains c on c.id = s.chain_id

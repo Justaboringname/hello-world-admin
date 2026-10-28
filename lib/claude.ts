@@ -57,8 +57,9 @@ export async function claudeJson({
     {
       model: CLAUDE_MODEL,
       // Thinking counts toward this too. Adaptive thinking is always on for
-      // this model; low effort keeps it short, since people are waiting.
-      max_tokens: 16_000,
+      // this model; low effort keeps it short, since people are waiting. Rate
+      // limits count max_tokens up front, and 22 s can't produce more anyway.
+      max_tokens: 4_096,
       output_config: { effort: "low", format: { type: "json_schema", schema } },
       betas: ["server-side-fallback-2026-07-01"],
       fallbacks: "default",

@@ -20,8 +20,8 @@ const ATTEMPT_TIMEOUT_MS = 20_000;
 // /media/new allows 60 s (maxDuration); leave time to upload and save afterwards.
 // Claude and Gemini share this deadline.
 const DEADLINE_MS = 50_000;
-// A model that stalls stops here, so the last one still gets a full attempt.
-const MODEL_BUDGET_MS = DEADLINE_MS - ATTEMPT_TIMEOUT_MS;
+// A model that stalls is cut off one full attempt before the deadline, so the
+// last one still gets that attempt, however much of the deadline Claude used.
 
 const CAPTION_COUNT = 3;
 const CAPTION_MAX_LENGTH = 200;
@@ -52,8 +52,8 @@ function buildPrompt(vibe: Vibe, location: string | null) {
 }
 
 // Claude's structured outputs need additionalProperties: false and don't take
-// minItems/maxItems, so there the prompt asks for the count. parseCaptions
-// enforces it for both models.
+// minItems/maxItems, so there only the prompt asks for the count. For both
+// models, parseCaptions keeps at most that many.
 const CLAUDE_CAPTIONS_SCHEMA = {
   type: "object",
   properties: { captions: { type: "array", items: { type: "string" } } },
@@ -77,6 +77,7 @@ export async function generateCaptions({
 }): Promise<CaptionResult> {
   const prompt = buildPrompt(vibe, location);
   // Claude stops after its share (lib/claude.ts); Gemini gets what's left.
+  const deadlineAt = Date.now() + DEADLINE_MS;
   const deadline = AbortSignal.timeout(DEADLINE_MS);
 
   try {
@@ -117,9 +118,8 @@ export async function generateCaptions({
   for (const [index, model] of models.entries()) {
     if (deadline.aborted) break;
     const isLast = index === models.length - 1;
-    const signal = isLast
-      ? deadline
-      : AbortSignal.any([deadline, AbortSignal.timeout(MODEL_BUDGET_MS)]);
+    const budget = Math.max(0, deadlineAt - Date.now() - ATTEMPT_TIMEOUT_MS);
+    const signal = isLast ? deadline : AbortSignal.any([deadline, AbortSignal.timeout(budget)]);
     let text: string | undefined;
     try {
       const response = await ai.models.generateContent({
@@ -174,12 +174,13 @@ export async function generateCaptions({
     return { captions, systemPrompt: SYSTEM_PROMPT, prompt, model };
   }
 
+  // Claude already failed or had no key by now, so these are about the fallback.
   throw new CaptionError(
     isBadKey(lastError)
-      ? "Gemini rejected the API key. Check GEMINI_API_KEY in the Vercel project, then redeploy."
+      ? "Claude couldn't answer, and Gemini rejected its API key. Check GEMINI_API_KEY in the Vercel project, then redeploy."
       : isBusy(lastError)
-        ? "Gemini is overloaded right now. Wait a minute and try again."
-        : "Gemini couldn't caption that photo. Please try again.",
+        ? "Claude couldn't answer, and Gemini is overloaded right now. Wait a minute and try again."
+        : "Neither Claude nor Gemini could caption that photo. Please try again.",
   );
 }
 
