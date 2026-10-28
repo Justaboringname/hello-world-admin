@@ -17,8 +17,7 @@ sharing the main app's Supabase database and Google sign-in. Only users whose
 | `/memes`, `/memes/[id]` | Moderate memes: edit the text, make one members-only, delete it      |
 | `/votes`       | **Read** every 👍/👎 (who, on what, when), and the ratings: captions and memes ranked by score |
 | `/prompt-chains` | **Read** each vibe's prompt chain and its steps (model, temperature, the exact prompts). **Read/update** the prompt chain mix |
-| `/requests`    | **Read** every generation request: who, which vibe and model, the exact prompts, how many captions came back |
-| `/responses`   | **Read** every LLM response: the captions each request returned, with their votes |
+| `/requests`    | **Read** every generation request with its LLM response: who, which vibe and model, the exact prompts, and the captions that came back with their votes. Filter by vibe or model. `/responses` redirects here |
 | `/examples`    | **Create/read/update/delete** example captions that show a chain's voice |
 | `/terms`       | **Create/read/update/delete** Columbia and NYC lore terms (Butler, Lit Hum, …) |
 | `/llm-models`, `/llm-providers` | **Create/read/update/delete** LLM models and the providers they come from |

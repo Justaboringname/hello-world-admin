@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // LLM responses used to have their own page; they're on /requests now, with
+  // the request each one answers. Old links (and their ?model=) still land.
+  async redirects() {
+    return [{ source: "/responses", destination: "/requests", permanent: false }];
+  },
   // No other site may frame the panel (clickjacking a Delete button), and
   // nothing in it should reach a search engine or another site's logs.
   async headers() {

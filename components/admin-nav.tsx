@@ -18,8 +18,7 @@ export const NAV_GROUPS = [
     label: "Pipeline",
     items: [
       { href: "/prompt-chains", label: "Prompt chains", icon: "⛓️" },
-      { href: "/requests", label: "Requests", icon: "📨" },
-      { href: "/responses", label: "LLM responses", icon: "💬" },
+      { href: "/requests", label: "Requests & responses", icon: "📨" },
       { href: "/examples", label: "Examples", icon: "🧪" },
       { href: "/terms", label: "Terms", icon: "📖" },
     ],

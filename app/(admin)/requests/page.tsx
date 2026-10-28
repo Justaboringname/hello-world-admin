@@ -3,22 +3,26 @@ import Link from "next/link";
 import type { MediaDetail } from "@/components/media/data";
 import { Badge, EmptyState, FilterTabs, LoadError, PageHeader, Pagination, hrefWith, linkClass } from "@/components/ui";
 import { When } from "@/components/users/when";
+import { VoteTally } from "@/components/vote-tally";
 import { requireAdmin } from "@/lib/auth";
 import { MANUAL_MODEL, VIBES, isVibe, vibeLabel, type Vibe } from "@/lib/captions";
-import { displayName, formatNumber, pageIndex, plural } from "@/lib/format";
+import { displayName, formatNumber, pageIndex, scoreTone, signedScore } from "@/lib/format";
 import { firstParam } from "@/lib/redirect";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "Generation requests" };
+export const metadata: Metadata = { title: "Requests & responses" };
 
 const PAGE_SIZE = 25;
 
-// A photo row as a request: who asked, with what prompts, and how many
-// captions it has. Only the caption ids come along, to count them.
-type RequestRow = Omit<MediaDetail, "image_path" | "captions"> & { captions: { id: number }[] };
+// A photo row as one LLM call: the request (who asked, the vibe, the exact
+// prompts, the model) and the response (the captions that came back).
+type CallRow = Omit<MediaDetail, "image_path">;
 
-const REQUEST_COLUMNS =
-  "id, user_id, author_name, location, vibe, system_prompt, prompt, model, created_at, captions(id)";
+const CALL_COLUMNS =
+  "id, user_id, author_name, location, vibe, system_prompt, prompt, model, created_at, captions(id, position, text, upvotes, downvotes, score)";
+
+const PAGE_DESCRIPTION =
+  "Each photo posted for AI captions is one request and its response: who asked, the exact prompts, the model that answered (Claude Opus 5.5, or Gemini when Claude couldn't), and the captions that came back with their votes. Only requests that worked are saved: failed calls aren't logged yet, here or in the main app. Admins can reword, add or delete captions on a photo's page, so these are the captions as they are now.";
 
 // Same as the prompts on a photo's page: the exact text, line breaks kept.
 function Prompt({ label, text, empty }: { label: string; text: string; empty: string }) {
@@ -47,8 +51,8 @@ function ModelBadge({ model }: { model: string }) {
   );
 }
 
-// Every photo in generations is one caption request: its prompts, model and
-// time are saved with it. Nothing else is logged yet.
+// Every photo in generations is one call: its prompts, model and time are
+// saved with it, and its captions are the answer. Nothing else is logged yet.
 export default async function RequestsPage({ searchParams }: PageProps<"/requests">) {
   await requireAdmin("/requests");
   const params = await searchParams;
@@ -58,41 +62,66 @@ export default async function RequestsPage({ searchParams }: PageProps<"/request
 
   const supabase = await createClient();
 
-  let query = supabase.from("generations").select(REQUEST_COLUMNS, { count: "exact" });
+  // The model tabs: every model that has answered. PostgREST has no DISTINCT,
+  // so this reads each photo's model (up to the server's row cap, 1,000 by
+  // default, newest first) and dedupes. Plenty at class size.
+  const modelRows = await supabase.from("generations").select("model").order("created_at", { ascending: false });
+  if (modelRows.error) {
+    return (
+      <>
+        <PageHeader title="Requests & responses" description={PAGE_DESCRIPTION} />
+        <LoadError what="models" error={modelRows.error} />
+      </>
+    );
+  }
+  const models = [...new Set(((modelRows.data ?? []) as { model: string }[]).map((row) => row.model))].sort();
+  // Only a model from the list filters, so anything else in the URL is ignored.
+  const modelParam = firstParam(params.model);
+  const model = modelParam && models.includes(modelParam) ? modelParam : undefined;
+
+  let query = supabase.from("generations").select(CALL_COLUMNS, { count: "exact" });
   if (vibe) query = query.eq("vibe", vibe);
+  if (model) query = query.eq("model", model);
   // The unique id keeps requests made in the same instant from swapping pages.
   const result = await query
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })
     .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
 
-  const requests = (result.data ?? []) as RequestRow[];
-  const matched = result.count ?? requests.length;
+  const calls = (result.data ?? []) as CallRow[];
+  const matched = result.count ?? calls.length;
   // PGRST103: a ?page= past the last page.
-  const pastEnd = result.error?.code === "PGRST103" || (!result.error && !requests.length && page > 0);
+  const pastEnd = result.error?.code === "PGRST103" || (!result.error && !calls.length && page > 0);
   const error = pastEnd ? null : result.error;
 
-  const linkParams = { vibe };
+  // Each row of tabs keeps the other filter.
+  const linkParams = { vibe, model };
   const vibeTabs = [
-    { href: "/requests", label: "All vibes", active: !vibe },
+    { href: hrefWith("/requests", { model }), label: "All vibes", active: !vibe },
     ...(Object.keys(VIBES) as Vibe[]).map((key) => ({
-      href: hrefWith("/requests", { vibe: key }),
+      href: hrefWith("/requests", { vibe: key, model }),
       label: vibeLabel(key),
       active: key === vibe,
     })),
   ];
+  const modelTabs = [
+    { href: hrefWith("/requests", { vibe }), label: "All models", active: !model },
+    ...models.map((key) => ({
+      href: hrefWith("/requests", { vibe, model: key }),
+      label: key === MANUAL_MODEL ? "✍️ Written by hand" : <span className="font-mono">{key}</span>,
+      active: key === model,
+    })),
+  ];
   const first = page * PAGE_SIZE + 1;
-  const last = page * PAGE_SIZE + requests.length;
+  const last = page * PAGE_SIZE + calls.length;
 
   return (
     <>
-      <PageHeader
-        title="Generation requests"
-        description="Each photo posted for AI captions is one request, saved with its exact prompts and the model that answered: Claude Opus 5.5, or Gemini when Claude couldn't. Only requests that worked are saved: failed calls aren't logged yet, here or in the main app."
-      />
+      <PageHeader title="Requests & responses" description={PAGE_DESCRIPTION} />
 
-      <div className="mb-5">
+      <div className="mb-5 space-y-2">
         <FilterTabs label="Filter by vibe" items={vibeTabs} />
+        <FilterTabs label="Filter by model" items={modelTabs} />
       </div>
 
       {error ? (
@@ -111,7 +140,7 @@ export default async function RequestsPage({ searchParams }: PageProps<"/request
               <span className="font-medium text-zinc-900 dark:text-zinc-100">{formatNumber(matched)}</span>{" "}
               {matched === 1 ? "request" : "requests"}
             </span>
-            {vibe && (
+            {(vibe || model) && (
               <Link href="/requests" className={linkClass}>
                 Clear filters
               </Link>
@@ -123,42 +152,65 @@ export default async function RequestsPage({ searchParams }: PageProps<"/request
             )}
           </p>
 
-          {requests.length ? (
+          {calls.length ? (
             <ul className="divide-y divide-zinc-100 rounded-2xl border border-zinc-200 bg-surface px-4 shadow-sm dark:divide-zinc-800 dark:border-zinc-800">
-              {requests.map((request) => {
-                const isManual = request.model === MANUAL_MODEL;
+              {calls.map((call) => {
+                const isManual = call.model === MANUAL_MODEL;
+                const captions = [...(call.captions ?? [])].sort((a, b) => a.position - b.position);
                 return (
-                  <li key={request.id} className="py-3">
+                  <li key={call.id} className="py-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="flex flex-wrap items-center gap-1.5">
-                        <ModelBadge model={request.model} />
-                        <Badge>{vibeLabel(request.vibe)}</Badge>
+                        <ModelBadge model={call.model} />
+                        <Badge>{vibeLabel(call.vibe)}</Badge>
                       </span>
-                      <Link href={`/media/${request.id}`} className={`text-sm ${linkClass}`}>
-                        Open photo<span className="sr-only"> #{request.id}</span> <span aria-hidden>→</span>
+                      <Link href={`/media/${call.id}`} className={`text-sm ${linkClass}`}>
+                        Open photo<span className="sr-only"> #{call.id}</span> <span aria-hidden>→</span>
                       </Link>
                     </div>
                     <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-500 dark:text-zinc-400">
-                      <When iso={request.created_at} show="ago" />
+                      <When iso={call.created_at} show="ago" />
                       <span>
                         · by{" "}
-                        <Link href={`/users/${request.user_id}`} className="hover:underline">
-                          {displayName(request.author_name)}
+                        <Link href={`/users/${call.user_id}`} className="hover:underline">
+                          {displayName(call.author_name)}
                         </Link>
                       </span>
-                      {request.location && <span>· 📍 {request.location}</span>}
-                      <span className="tabular-nums">· {plural(request.captions?.length ?? 0, "caption")}</span>
+                      {call.location && <span>· 📍 {call.location}</span>}
                     </p>
+
+                    {captions.length ? (
+                      // Numbered by position, so a gap shows a caption was deleted.
+                      <ol className="mt-2 list-decimal space-y-1.5 pl-6 text-sm marker:text-zinc-500 dark:marker:text-zinc-400">
+                        {captions.map((caption) => (
+                          <li key={caption.id} value={caption.position}>
+                            <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                              <span className="min-w-0 break-words">“{caption.text}”</span>
+                              <span className="flex shrink-0 items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+                                <VoteTally upvotes={caption.upvotes} downvotes={caption.downvotes} />
+                                <Badge tone={scoreTone(caption.score)}>
+                                  <span className="sr-only">Score </span>
+                                  {signedScore(caption.score)}
+                                </Badge>
+                              </span>
+                            </div>
+                          </li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <p className="mt-2 text-sm italic text-zinc-500 dark:text-zinc-400">No captions.</p>
+                    )}
+
                     <details className="mt-2">
                       <summary className="cursor-pointer text-sm font-medium">
                         {isManual ? "Saved prompts (no AI was called)" : "Exact prompts sent"}
                       </summary>
                       <Prompt
                         label="System prompt"
-                        text={request.system_prompt}
+                        text={call.system_prompt}
                         empty="None: an admin wrote these captions by hand."
                       />
-                      <Prompt label="Prompt (sent with the photo)" text={request.prompt} empty="None." />
+                      <Prompt label="Prompt (sent with the photo)" text={call.prompt} empty="None." />
                     </details>
                   </li>
                 );
@@ -166,9 +218,9 @@ export default async function RequestsPage({ searchParams }: PageProps<"/request
             </ul>
           ) : (
             <EmptyState>
-              {vibe ? (
+              {vibe || model ? (
                 <>
-                  No requests with this vibe.{" "}
+                  No requests match these filters.{" "}
                   <Link href="/requests" className={linkClass}>
                     Show every request
                   </Link>
