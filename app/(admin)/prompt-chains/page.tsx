@@ -54,8 +54,8 @@ function PromptText({ label, text }: { label: string; text: string }) {
 }
 
 // One chain per vibe, the requests it makes in order, and how often each
-// should be picked. Chains and steps change through supabase/week7.sql, not
-// here; the mix weights are the only thing this page saves.
+// should be picked. Chains and steps are edited in the prompt chain tool
+// (Week 8, its own app); the mix weights are the only thing this page saves.
 export default async function PromptChainsPage() {
   await requireAdmin("/prompt-chains");
   const supabase = await createClient();
@@ -90,6 +90,7 @@ export default async function PromptChainsPage() {
     return row ? [{ chainId: chain.id, name: chain.name, weight: row.weight }] : [];
   });
   const notInMix = chains.filter((chain) => !mixByChain.has(chain.id));
+  const chainsTool = process.env.NEXT_PUBLIC_CHAINS_TOOL_URL?.trim() || null;
   const lastChanged = mix.reduce<string | null>(
     (latest, row) => (!latest || Date.parse(row.updated_at) > Date.parse(latest) ? row.updated_at : latest),
     null,
@@ -100,6 +101,13 @@ export default async function PromptChainsPage() {
       <PageHeader
         title="Prompt chains"
         description="The prompts behind each vibe, step by step, and how often each one should be picked. Read only, except the mix."
+        actions={
+          chainsTool ? (
+            <a href={chainsTool} target="_blank" rel="noreferrer" className={linkClass}>
+              Edit chains in the prompt chain tool ↗
+            </a>
+          ) : undefined
+        }
       />
       {chainsResult.error ? (
         <LoadError what="prompt chains" error={chainsResult.error} setupFile="supabase/week7.sql" />
@@ -111,8 +119,9 @@ export default async function PromptChainsPage() {
             <p>
               These chains are seeded from the main app&apos;s <code className="font-mono">lib/gemini.ts</code>.
               The main app still runs those prompts from code and doesn&apos;t read these tables yet, and
-              neither does <code className="font-mono">/media/new</code> here. Each chain is one step today:
+              neither does <code className="font-mono">/media/new</code> here. Each vibe&apos;s chain is one step:
               one call to Claude Opus 5.5 (Gemini when Claude can&apos;t answer) that sees the photo and returns three captions.
+              Chains made in the prompt chain tool can have more steps.
             </p>
             <p>
               In a user prompt, <code className="font-mono">{"{location_line}"}</code> is filled in for each

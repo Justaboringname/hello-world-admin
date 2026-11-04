@@ -325,7 +325,12 @@ Rules:
     ('columbia', $v$a stressed Columbia College junior. Reference campus life where it fits: the Core, all-nighters in Butler Library, dorm life, dining hall food, Morningside Heights, the 1 train.$v$),
     ('newyorker', $v$a born-and-raised New Yorker who has seen it all. Deadpan, unimpressed, brutally efficient, a little rude but never mean.$v$)
   ) as v (slug, instruction) on v.slug = c.slug
-on conflict (chain_id, step_order) do nothing;
+-- Not "on conflict": the prompt chain tool's week8.sql makes (chain_id,
+-- step_order) deferrable so steps can be reordered, and a deferrable
+-- constraint can't be an ON CONFLICT arbiter.
+ where not exists (
+   select 1 from public.prompt_chain_steps x where x.chain_id = c.id and x.step_order = 1
+ );
 
 -- Users pick the vibe themselves, so an even mix to start.
 insert into public.prompt_chain_mix (chain_id, weight)
